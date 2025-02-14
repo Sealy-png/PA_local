@@ -1,0 +1,12 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environment directories
+venv/
+.env/
+
+junk.py
