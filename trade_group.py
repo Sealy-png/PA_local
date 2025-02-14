@@ -7,7 +7,6 @@ class Trade_Group:
         self.category = category  # 2 = liquidation?
         self.open_trades = []
         self.close_trades = []
-        self.closeTrade = None  # Ebenfalls als liste setzten für
         self.price = 0  # average of all open trade prices (relative to volume)
         self.pnl = 0  # aus API profit - alle makker/takerfees
         self.tp_hit = False
@@ -66,7 +65,7 @@ class Trade_Group:
         total_fees = 0
         for trade in self.open_trades:
             total_fees += trade.fees
-        total_fees += self.closeTrade.fees
+
         # Needs fees to be set, otherwise value is wrong. Does not include funding fee
         for trade in self.close_trades:
             total_fees += trade.fees
