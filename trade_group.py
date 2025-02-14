@@ -11,11 +11,13 @@ class Trade_Group:
         self.pnl = 0  # aus API profit - alle makker/takerfees
         self.tp_hit = False
         self.sl_hit = False
-        self.be_point = 0
+        self.be_point = be_point
         self.outcome = 0  # -1 = loss, 0 = break evenn, 1 = profit
         self.fees = 0
         self.rr_ratios = []
         self.timestamp = None
+        self.total_margin = 0
+
 
     def post_init(self):
         """
@@ -45,7 +47,11 @@ class Trade_Group:
         :return:
         """
         profit = self.pnl
-        theo_be_point = self.get_margin() * self.be_point
+        test = self.be_point
+        theo_be_point = 0
+        self.get_margin()
+        if(self.be_point != 0):
+            theo_be_point = self.total_margin * self.be_point
 
         if(self.pnl > theo_be_point):
             self.outcome = 1
@@ -58,7 +64,8 @@ class Trade_Group:
         total_margin = 0
         for trade in self.open_trades:
             total_margin += trade.investment
-        return total_margin
+
+        self.total_margin = total_margin
 
 
     def set_fees(self):

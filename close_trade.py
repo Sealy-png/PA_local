@@ -10,7 +10,6 @@ class Close_Trade:
         self.fees = fees
         self.raw_profit = profit  # profit given by api does not include fees.
         self.profit = self.raw_profit - self.fees
-        pass
 
 
     def get_price(self):

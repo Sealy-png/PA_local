@@ -47,10 +47,11 @@ def get_potential_liquidations():
 def main():
 
     testuser = user.User("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136")
-    testuser.set_be_point(0.5)
-    #test_group_trades_by_key(testuser)
-    test_get_trades_mexc(testuser)
-    print(len(testuser.trade_list))
+    testuser.set_be_point(1)
+    #testuser.get_trades_mexc()
+    test_group_trades_by_key(testuser) #erster trade fehlt in API output, checken obs wegen timestamp ist.
+    #test_get_trades_mexc(testuser)
+    #print(len(testuser.trade_list))
 
 
     #test_group_trades_by_key(testuser)
@@ -64,9 +65,11 @@ def main():
 
     #print(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"))
 
-    #testuser.total_profit()
-    #testuser.get_winrate()
+    #testuser.get_pnls()
+    #testuser.net_profit()
+    #testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
     #print(testuser.winrate)
+    #testuser.get_outcomes()
     #testuser.long_short_ratio()
     #testuser.get_traded_assets()
     #testuser.get_timestamps()

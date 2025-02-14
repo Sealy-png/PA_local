@@ -34,16 +34,20 @@ class User:
     def get_pnls(self):
 
         for trade in self.trade_list:
-            Trade_Group.set_pnl(trade)
+            Trade_Group
+            print(trade.fees)
             print(trade.pnl)
 
     def get_winrate(self): # Hier trades pro positionId
         won = 0
         for tr in self.trade_list:
             Trade_Group.set_pnl(tr)
-            if tr.pnl > 0:
+            if tr.outcome == 1:
                 won += 1
-        self.winrate = (won / len(self.trade_list)) * 100
+        if(won != 0):
+            self.winrate = (won / len(self.trade_list)) * 100
+        else:
+            self.winrate= 0
 
     def get_traded_assets(self):
         assets = {}
@@ -83,7 +87,9 @@ class User:
 
     def get_outcomes(self):
         for trade in self.trade_list:
+            #print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
             print(trade.outcome)
+
 
     def calc_profitfactor_month(self):
         #get all trades within last 30 days
