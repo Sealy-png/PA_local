@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 import mexc_api as mexc
@@ -24,19 +24,17 @@ class User:
         self.be_point = point/100
 
     def get_timestamps(self):
-        print(len(self.trade_list))
         for tr in self.trade_list:
             # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
-            print(str(tr.positionId) + "   " + str(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0,
-                                                                                   tz=datetime.timezone.utc)) + "    " + str(tr.category))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,
+                                                                                   )) + "    " + str(tr.category))
 
 
     def get_pnls(self):
-
         for trade in self.trade_list:
-            Trade_Group
-            print(trade.fees)
             print(trade.pnl)
+
+
 
     def get_winrate(self): # Hier trades pro positionId
         won = 0
@@ -78,12 +76,7 @@ class User:
 
         print(net)
 
-    def collect_rr_ratios(self):
-        rr_dict = defaultdict(list)
 
-        for trade in self.trade_list:
-            #if(trade.)
-            pass
 
     def get_outcomes(self):
         for trade in self.trade_list:
@@ -122,6 +115,28 @@ class User:
             trade_details = [f"positionId = {trade.positionId}, pnl = {trade.pnl}" for trade in trades]
             print("; ".join(trade_details))
 
+    def trade_frequency_by_week(self):
+        trade_by_week = defaultdict(list)
+
+        for trade in self.trade_list:
+            trade_date = datetime.fromtimestamp(trade.timestamp / 1000)
+            iso_year, iso_week, _ = trade_date.isocalendar()  # ISO year and week number
+
+            # Find the Monday of the ISO week in the correct year
+            start_of_week = datetime.strptime(f'{iso_year}-W{iso_week}-1', "%G-W%V-%u")
+            end_of_week = start_of_week + timedelta(days=6)
+
+            week_label = f"KW {iso_week} {iso_year}, {start_of_week.strftime('%d.%m.%y')} - {end_of_week.strftime('%d.%m.%y')}"
+            trade_by_week[(iso_year, iso_week)].append((week_label, trade))
+        # Sort by year and week number chronologically
+        sorted_weeks = sorted(trade_by_week.items())
+        for (_, trades) in sorted_weeks:
+            week_label = trades[0][0]  # Extract week label from the first entry
+            print(f"{week_label} ({len(trades)} trades):", end=" ")
+            trade_details = [f"positionId = {trade.positionId}, pnl = {trade.pnl}" for _, trade in trades]
+            print("; ".join(trade_details))
+
+
     def get_longest_streak(self):
         current_streak = 0
         longest_streak = 0
@@ -145,8 +160,7 @@ class User:
             longest_streak_list = current_streak_list[:]
 
         for tr in longest_streak_list:
-            print(str(tr.positionId) + "   " + str(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0,
-                                                                                   tz=datetime.timezone.utc))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,))
                   + "    " + str(tr.outcome))
         # return longest_streak, longest_streak_list
 

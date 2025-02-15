@@ -47,31 +47,24 @@ def get_potential_liquidations():
 def main():
 
     testuser = user.User("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136")
-    testuser.set_be_point(1)
-    #testuser.get_trades_mexc()
-    test_group_trades_by_key(testuser) #erster trade fehlt in API output, checken obs wegen timestamp ist.
+    testuser.set_be_point(0.1)
+    testuser.get_trades_mexc()
+    #test_group_trades_by_key(testuser) #erster trade fehlt in API output, checken obs wegen timestamp ist.
     #test_get_trades_mexc(testuser)
     #print(len(testuser.trade_list))
 
 
-    #test_group_trades_by_key(testuser)
-    #testuser.trade_frequency()
-    #print(testuser.calc_profitfactor_month())
-    #print(mexc.get_history_orders("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136"))
-    #testuser.get_trades_mexc()
-    #trades = mexc.get_history_orders("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136")
-    #test_group_trades_by_key(testuser)
-    #test_get_trades_mexc()
-
     #print(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"))
 
+    #testuser.trade_frequency_by_day()
     #testuser.get_pnls()
     #testuser.net_profit()
-    #testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
-    #print(testuser.winrate)
+    testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
+    print(testuser.winrate)
     #testuser.get_outcomes()
     #testuser.long_short_ratio()
     #testuser.get_traded_assets()
+    #print(testuser.calc_profitfactor_month())
     #testuser.get_timestamps()
     #testuser.long_short_winrate()
     #testuser.get_outcomes() # 1 = win -1 = loss

@@ -15,6 +15,7 @@ class Trade_Group:
         self.outcome = 0  # -1 = loss, 0 = break evenn, 1 = profit
         self.fees = 0
         self.rr_ratios = []
+        self.risk_reward = 0
         self.timestamp = None
         self.total_margin = 0
 
@@ -32,12 +33,13 @@ class Trade_Group:
         self.set_pnl()   # used in set_outcome
         self.set_outcome()
         self.find_highest_timestamp() # no dependencies
+        self.set_rr_ratios()
+
 
     def set_rr_ratios(self):
         for trade in self.open_trades:
             if trade.riskreward != None:
                 self.rr_ratios.append(trade.riskreward)
-
 
     def set_outcome(self):  # marge muss durch den be point gesetzt werden wenn trade erstellt wird, point kommt aus dem user
         """
