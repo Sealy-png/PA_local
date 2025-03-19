@@ -46,10 +46,15 @@ def get_potential_liquidations():
 
 def main():
 
-    testuser = user.User("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136")
+    testuser = user.User("mx0vglZhYi5s3DgRAi", "9aadf3b2f7bf4be3850ab29404df36f8")
+
     testuser.set_be_point(0.1)
-    testuser.get_trades_mexc()
-    #test_group_trades_by_key(testuser) #erster trade fehlt in API output, checken obs wegen timestamp ist.
+    #testuser.get_trades_mexc()
+    trades = testuser.text_group_trades_by_key()
+    testuser.create_trade_groups(trades)
+    testuser.positionsize_vs_pnl()
+
+    #test_group_trades_by_key(testuser) #erster trade fehlt in API output.txt, checken obs wegen timestamp ist.
     #test_get_trades_mexc(testuser)
     #print(len(testuser.trade_list))
 

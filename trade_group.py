@@ -65,7 +65,7 @@ class Trade_Group:
     def get_margin(self):
         total_margin = 0
         for trade in self.open_trades:
-            total_margin += trade.investment
+            total_margin += trade.margin
 
         self.total_margin = total_margin
 
@@ -111,6 +111,18 @@ class Trade_Group:
 
         self.price = weighed_sum/total_volume
 
+
+    # prozentsatz vom pnl relativ zur positionsgröße
+    def ps_v_pnl(self):
+        size = self.calcpositionsize()
+        return self.pnl/size
+
+
+    def calcpositionsize(self):
+        size = 0
+        for trade in self.open_trades:
+            size += trade.margin * trade.leverage
+        return size
 
 
 
