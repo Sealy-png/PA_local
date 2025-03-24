@@ -56,7 +56,7 @@ def main():
 
     #print(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"))
 
-    #testuser.trade_frequency_by_day()
+    #testuser.trade_frequency_by_day() # Sortierung stimmt noch nicht.
     #testuser.get_pnls()
     #testuser.net_profit()
     testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
