@@ -1,6 +1,9 @@
+from audioop import avgpp
 from collections import defaultdict
 from datetime import datetime, timedelta
 import time
+import json
+import os
 
 import mexc_api as mexc
 from close_trade import Close_Trade
@@ -101,6 +104,15 @@ class User:
                 total_lost+= trade.pnl
         # return profit/loss
         return total_won/total_lost
+
+    def positionsize_vs_pnl(self):
+        avg = 0
+        for trade in self.trade_list:
+            current = trade.ps_v_pnl()
+            print(current)
+            avg += current
+        print("avergae: "+ str(avg/len(self.trade_list)))
+
 
     def trade_frequency_by_day(self):
         trade_by_date = defaultdict(list)
@@ -261,6 +273,7 @@ class User:
             if value not in grouped:
                 grouped[value] = []
             grouped[value].append(trade)
+        print(len(grouped))
         return grouped
 
 
@@ -306,7 +319,98 @@ class User:
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
                     timestamp=open_trade['createTime'],
-                    investment=open_trade['usedMargin'],
+                    margin=open_trade['usedMargin'],
+                    tp=open_trade.get('takeProfitPrice',None),
+                    sl=open_trade.get('stopLossPrice', None),
+                    fees = buy_fees
+                    ))
+
+                # Set the sell trade for the trade group
+            for close_trade in close_trades:
+                sell_fees = close_trade.get('makerFee', None) + close_trade.get('takerFee', None)
+                trade.add_close_trade(Close_Trade(
+                    price=close_trade['dealAvgPrice'],
+                    volume=close_trade['dealVol'],
+                    timestamp=close_trade['createTime'],
+                    profit=close_trade['profit'],
+                    fees=sell_fees
+                    ))
+
+
+            for close_trade in close_trades:
+                if 'externalOid' in close_trade and "STOP_LOSS" in close_trade['externalOid']:
+                    trade.set_slhit()
+                if 'externalOid' in close_trade and "TAKE_PROFIT" in close_trade['externalOid']:
+                    trade.set_tphit()
+                # Append the trade group to the trades list
+
+            self.trade_list.append(trade)
+            Trade_Group.post_init(trade)
+
+    @staticmethod
+    def text_group_trades_by_key():
+        """
+        Create dictionary with positionId as key, each having a list of trades associated with the ID
+
+        :return: Dictionary with grouped trades
+        """
+        file_path = 'C:\\Users\\Ammar\\PycharmProjects\\PA_local\\output.txt'
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        grouped = {}
+        trades = data['data']
+        #print(json.dumps(trades))
+
+        for trade in trades:
+            value = trade['positionId']
+            if value not in grouped:
+                grouped[value] = []
+            grouped[value].append(trade)
+        print(len(grouped))
+        return grouped
+
+    def text_create_trade_groups(self, trades):
+        """
+        Iterates over dictionary created in /group_trades_by_key/, checks each position ID and creates a trade for each closing action
+
+        :param trades:
+        :return: none
+        """
+        print(len(trades))
+        for position_id, trades in trades.items():
+
+
+            # Separate buy and sell trades
+            open_trades = [trade for trade in trades if trade['state'] == 3 and (
+                    trade['side'] == 1 or trade['side'] == 3)]  # 1 = open_trade long, 3 = open_trade short
+            close_trades = [trade for trade in trades if trade['state'] == 3 and (
+                    trade['side'] == 2 or trade['side'] == 4)]  # 2 = close_trade short, 4 = close_trade long
+
+            if (len(close_trades) == 0):
+                continue
+
+            # If multiple sell trades exist, divide fees equally among each sell trade
+            buy_fees = 0
+            for trade in open_trades:
+                buy_fees += trade['makerFee']
+                buy_fees += trade['takerFee']
+            buy_fees: int = buy_fees
+
+            # Create a TradeGroup for each sell trade
+            template = close_trades[0]
+            trade = Trade_Group(positionId=position_id, side=template['side'], pair=template['symbol'],
+                                category=template['category'], be_point=self.be_point)
+
+
+            # Add all buy trades to the trade group
+            for open_trade in open_trades:
+                trade.add_open_trade(Open_Trade(
+                    open_type=open_trade['openType'],
+                    price=open_trade['price'],
+                    volume=open_trade['dealVol'],
+                    leverage=open_trade['leverage'],
+                    timestamp=open_trade['createTime'],
+                    margin=open_trade['usedMargin'],
                     tp=open_trade.get('takeProfitPrice',None),
                     sl=open_trade.get('stopLossPrice', None),
                     fees = buy_fees
