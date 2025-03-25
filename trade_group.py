@@ -19,6 +19,7 @@ class Trade_Group:
         self.total_margin = 0
         self.liqprice = None
         self.risk = 0
+        self.is_liquidated = False
 
 
     def post_init(self):
@@ -57,7 +58,7 @@ class Trade_Group:
 
     def check_liquidation(self):
         for trade in self.close_trades:
-            print("Liquidation Price: " + str(self.liqprice) + "   Actual Price: " + str(trade.price))
+            print("Liquidation Price: " + str(self.liqprice) + "   Actual Price: " + str(trade.price) + "    Delta: " + str(self.liqprice - self.price))
             if(trade.price == self.liqprice):
                 print(self.positionId)
 
@@ -73,8 +74,11 @@ class Trade_Group:
             avg_sl = avg_sl/count_sl
 
             positionsize = self.calcpositionsize()
+            mod_size = round(positionsize/self.price, 5)
             debug = self.price
-            risk = abs(self.price - avg_sl) * positionsize
+
+            risk = abs(self.price - avg_sl) * mod_size
+
             return risk
         else:
             return None
@@ -144,11 +148,12 @@ class Trade_Group:
         self.close_trades.append(closeTrade)
 
     def calc_open_price(self):
-        total_volume = sum(trade.volume for trade in self.open_trades)
-        weighed_sum = sum(trade.price*trade.volume for trade in self.open_trades)
+        total_volume = sum(trade.margin for trade in self.open_trades)
+        weighed_sum = sum(trade.price*trade.margin for trade in self.open_trades)
 
         if(total_volume == 0):
             self.price = 0
+            return
 
         self.price = weighed_sum/total_volume
 
@@ -165,7 +170,8 @@ class Trade_Group:
         size = 0
 
         for trade in self.open_trades:
-            size += trade.margin * trade.leverage
+            use_margin = trade.margin - trade.fees
+            size += use_margin * trade.leverage
         return size
 
 

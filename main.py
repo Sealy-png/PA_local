@@ -51,16 +51,23 @@ def main():
     #print(testuser.mexc_accountsize['USDT'])
 
     testuser.get_trades_mexc()
+    print(testuser.mexc_accountsize)
     testuser.risk_vs_accountsize()
+    #testuser.get_rr_ratios()
+    #testuser.get_liquidations()
+    #testuser.get_timestamps()
+    #print(mexc.get_history_orders(testuser.api_key, testuser.api_secret, page_size='100', )['data'])
+    #testuser.risk_vs_accountsize()
+
     """
-    group = user.User(mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50))
+    group = mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50)
     print(len(group))
     for position_id, trade_data in group.items():
         print(f"Position ID: {position_id}")
         print(trade_data)
 
-        print()"""
-
+        print()
+"""
     #for tr in testuser.trade_list:
         #tr.check_liquidation()
     #mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50)
@@ -69,7 +76,7 @@ def main():
     #print(testuser.trade_list[38].open_trades)
     #testuser.get_rr_ratios()
     #testuser.positionsize_vs_pnl()
-
+    #testuser.risk_vs_accountsize()
     #test_group_trades_by_key(testuser) #erster trade fehlt in API output.txt, checken obs wegen timestamp ist.
     #test_get_trades_mexc(testuser)
     #print(len(testuser.trade_list))

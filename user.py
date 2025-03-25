@@ -38,9 +38,9 @@ class User:
                 if currency:
                     # Store whatever values you care about
                     self.mexc_accountsize[currency] = {
-                        "availableBalance": entry.get("availableBalance", 0),
+                        #"availableBalance": entry.get("availableBalance", 0),
                         "equity": entry.get("equity", 0),
-                        "cashBalance": entry.get("cashBalance", 0)
+                        #"cashBalance": entry.get("cashBalance", 0)
                         # add more fields if needed
                         }
 
@@ -50,8 +50,8 @@ class User:
     def get_timestamps(self):
         for tr in self.trade_list:
             # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
-            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,
-                                                                                   )) + "    " + str(tr.category) + " Liquidation Price: " + str(tr.liqprice))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,))
+                                                                                    + "    " + str(tr.category) + "   Liquidation Price: " + str(tr.liqprice))
 
     def risk_vs_accountsize(self):
         for trade in self.trade_list:
@@ -60,8 +60,8 @@ class User:
                 continue
             pair = trade.pair.split("_")[1]
             entry = self.mexc_accountsize[pair]
-            size = entry["availableBalance"]
-            print(risk/size)
+            size = entry["equity"]
+            print("RISK:  " + str(round(risk,4)) +  "    result: " +str(round(risk/size, 4)) + "    Time: " + str(str(datetime.fromtimestamp(trade.timestamp / 1000.0,))) )
 
             #print(trade.trade_risk/accountsize["availableBalance"])
 
@@ -140,23 +140,51 @@ class User:
         total_won = 0
         total_lost = 0
         for trade in lastmonth_list:
+            #print(trade.pnl)
             if(trade.pnl >= 0):
                 total_won += trade.pnl
             else:
                 total_lost+= trade.pnl
+
+        print(total_lost)
+        print(total_won)
         # return profit/loss
-        return total_won/total_lost
+        factor = abs(total_won/total_lost)
+        if(total_won<total_lost):
+            return -1*factor
+        else:
+            return factor
+
+
 
     def positionsize_vs_pnl(self):
         avg = 0
         counter = 0
+        wins = []
+        losses = []
         for trade in self.trade_list:
             counter += 1
             if (len(trade.open_trades) != 0):
                 current = trade.ps_v_pnl()
-                print(str(current) + "   |   " + str(counter))
+                if(current >=0):
+                    wins.append(current)
+                else:
+                    losses.append(current)
+                print(str(round(current,4)) + "   |   " + str(counter))
                 avg += current
-        print("average: "+ str(avg/len(self.trade_list)))
+        avg_win = 0
+        avg_loss = 0
+
+        for x in wins:
+            avg_win += x
+        for x in losses:
+            avg_loss += x
+
+        avg_win = avg_win/len(self.trade_list)
+        avg_loss = avg_loss / len(self.trade_list)
+        print("average win: " +str(round(avg_win, 4)))
+        print("average loss: " + str(round(avg_loss, 4)))
+        print("average: "+ str(round(avg/len(self.trade_list), 4)))
 
     def trade_frequency_by_day(self):
         trade_by_date = defaultdict(list)
@@ -277,12 +305,8 @@ class User:
         print("Average amount won: " + str(avgwin) + " || Average amount lost: " + str(avgloss))
 
     def get_liquidations(self):
-        liquidations = []
         for trade in self.trade_list:
-            if trade.category == 2:
-                liquidations.append(trade)
-        print(len(liquidations))
-        return len(liquidations) / len(self.trade_list) * 100
+            trade.check_liquidation()
 
 
 
@@ -479,7 +503,7 @@ class User:
             for open_trade in open_trades:
                 trade.add_open_trade(Open_Trade(
                     open_type=open_trade['openType'],
-                    price=open_trade['price'],
+                    price=open_trade['dealAvgPrice'], #ehemals 'price' falls probleme aufkommen
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
                     timestamp=open_trade['createTime'],
