@@ -22,6 +22,27 @@ class User:
         self.trade_list = []
         self.winrate = 0
         self.be_point = 0  # percentage of margin where trade becomes break_even
+        self.mexc_accountsize = {}
+        self.set_mexc_accountsize(mexc.get_account_assets(self.api_key,self.api_secret))
+
+    def set_mexc_accountsize(self, api_response):
+        """
+        Populate self.mexc_accountsize with currency as key and account values from MEXC API response.
+        Expected format: {'data': [ { 'currency': 'USDT', 'availableBalance': ... }, ... ]}
+        """
+        self.mexc_accountsize = {}
+
+        if isinstance(api_response, dict) and 'data' in api_response:
+            for entry in api_response['data']:
+                currency = entry.get('currency')
+                if currency:
+                    # Store whatever values you care about
+                    self.mexc_accountsize[currency] = {
+                        "availableBalance": entry.get("availableBalance", 0),
+                        "equity": entry.get("equity", 0),
+                        "cashBalance": entry.get("cashBalance", 0)
+                        # add more fields if needed
+                        }
 
     def set_be_point(self, point):  #Should be created during intitializationn for usage, only to save dev time. Given in whole numbers:  1 = 1%
         self.be_point = point/100
@@ -30,7 +51,19 @@ class User:
         for tr in self.trade_list:
             # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
             print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,
-                                                                                   )) + "    " + str(tr.category))
+                                                                                   )) + "    " + str(tr.category) + " Liquidation Price: " + str(tr.liqprice))
+
+    def risk_vs_accountsize(self):
+        for trade in self.trade_list:
+            risk = trade.trade_risk()
+            if(risk == None):
+                continue
+            pair = trade.pair.split("_")[1]
+            entry = self.mexc_accountsize[pair]
+            size = entry["availableBalance"]
+            print(risk/size)
+
+            #print(trade.trade_risk/accountsize["availableBalance"])
 
 
     def get_pnls(self):
@@ -86,6 +119,15 @@ class User:
             #print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
             print(trade.outcome)
 
+    def get_rr_ratios(self):
+        for index, trade in enumerate(self.trade_list):
+            if trade.risk_reward != None:
+                print("TP: " + str(trade.open_trades[0].tp) +  "  |  Price: "
+                      + str(trade.open_trades[0].price) + "  |  SL: " + str(trade.open_trades[0].sl) + "  |  RR-Ratio: " + str(round(trade.risk_reward, 4)))
+                #for open in trade.open_trades:
+                   # print(open.riskreward)
+                #print(str(trade.risk_reward))
+                #print(f"Index: {index}, Trade: {trade}")
 
     def calc_profitfactor_month(self):
         #get all trades within last 30 days
@@ -107,22 +149,28 @@ class User:
 
     def positionsize_vs_pnl(self):
         avg = 0
+        counter = 0
         for trade in self.trade_list:
-            current = trade.ps_v_pnl()
-            print(current)
-            avg += current
-        print("avergae: "+ str(avg/len(self.trade_list)))
-
+            counter += 1
+            if (len(trade.open_trades) != 0):
+                current = trade.ps_v_pnl()
+                print(str(current) + "   |   " + str(counter))
+                avg += current
+        print("average: "+ str(avg/len(self.trade_list)))
 
     def trade_frequency_by_day(self):
         trade_by_date = defaultdict(list)
 
         # Group trades by date
         for trade in self.trade_list:
-            trade_date = datetime.fromtimestamp(trade.timestamp/1000).strftime('%d/%m/%Y')
+            trade_date = datetime.fromtimestamp(trade.timestamp / 1000).strftime('%d/%m/%Y')
             trade_by_date[trade_date].append(trade)
 
-        for date, trades in sorted(trade_by_date.items()):
+        # Sort dates descending by converting string back to datetime
+        sorted_dates = sorted(trade_by_date.keys(), key=lambda d: datetime.strptime(d, '%d/%m/%Y'), reverse=True)
+
+        for date in sorted_dates:
+            trades = trade_by_date[date]
             print(f"{date}:", end=" ")
             trade_details = [f"positionId = {trade.positionId}, pnl = {trade.pnl}" for trade in trades]
             print("; ".join(trade_details))
@@ -233,6 +281,7 @@ class User:
         for trade in self.trade_list:
             if trade.category == 2:
                 liquidations.append(trade)
+        print(len(liquidations))
         return len(liquidations) / len(self.trade_list) * 100
 
 
@@ -273,7 +322,7 @@ class User:
             if value not in grouped:
                 grouped[value] = []
             grouped[value].append(trade)
-        print(len(grouped))
+        #print(len(grouped))
         return grouped
 
 
@@ -285,7 +334,8 @@ class User:
         :param trades:
         :return: none
         """
-        print(len(trades))
+
+        group = self.history_mexc(mexc.history_positions(self.api_key, self.api_secret, 1, 50))
         for position_id, trades in trades.items():
 
 
@@ -346,6 +396,29 @@ class User:
 
             self.trade_list.append(trade)
             Trade_Group.post_init(trade)
+            if trade.positionId in group:
+                trade.liqprice = group[trade.positionId]["liquidatePrice"]
+
+
+
+    @staticmethod
+    def history_mexc(api_response):
+        """
+        Takes MEXC API JSON response and groups trades by positionId.
+        :param api_response: dict with 'data' key containing list of trade dicts
+        :return: dict {positionId: trade_data}
+        """
+        if not api_response.get('success') or 'data' not in api_response:
+            raise ValueError("Invalid API response format")
+
+        grouped = {}
+
+        for trade in api_response['data']:
+            position_id = trade.get('positionId')
+            if position_id is not None:
+                grouped[position_id] = trade
+
+        return grouped
 
     @staticmethod
     def text_group_trades_by_key():
@@ -366,7 +439,7 @@ class User:
             if value not in grouped:
                 grouped[value] = []
             grouped[value].append(trade)
-        print(len(grouped))
+        #print(len(grouped))
         return grouped
 
     def text_create_trade_groups(self, trades):

@@ -14,10 +14,11 @@ class Trade_Group:
         self.be_point = be_point
         self.outcome = 0  # -1 = loss, 0 = break evenn, 1 = profit
         self.fees = 0
-        self.rr_ratios = []
         self.risk_reward = 0
         self.timestamp = None
         self.total_margin = 0
+        self.liqprice = None
+        self.risk = 0
 
 
     def post_init(self):
@@ -28,18 +29,58 @@ class Trade_Group:
         :params: none
         :return:none
         """
-
+        self.calc_open_price()
         self.set_fees()  # used in set_pnl
         self.set_pnl()   # used in set_outcome
-        self.set_outcome()
+        self.set_outcome() #sets margin
         self.find_highest_timestamp() # no dependencies
         self.set_rr_ratios()
 
 
+
+
+
     def set_rr_ratios(self):
+        total_riskreward = 0
+        total_weight = 0
+
         for trade in self.open_trades:
-            if trade.riskreward != None:
-                self.rr_ratios.append(trade.riskreward)
+            if trade.riskreward is not None:
+                weight = trade.margin / self.total_margin
+                total_riskreward += weight * trade.riskreward
+                total_weight += weight
+
+        if total_weight > 0:
+            self.risk_reward = total_riskreward / total_weight
+        else:
+            self.risk_reward = None  # oder 0, falls du einen Default willst
+
+    def check_liquidation(self):
+        for trade in self.close_trades:
+            print("Liquidation Price: " + str(self.liqprice) + "   Actual Price: " + str(trade.price))
+            if(trade.price == self.liqprice):
+                print(self.positionId)
+
+    def trade_risk(self):
+        #Berechne StopLoss für risk rechnung
+        avg_sl = 0
+        count_sl = 0
+        for trade in self.open_trades:
+            if trade.sl != None:
+                avg_sl += trade.sl
+                count_sl += 1
+        if(count_sl != 0):
+            avg_sl = avg_sl/count_sl
+
+            positionsize = self.calcpositionsize()
+            debug = self.price
+            risk = abs(self.price - avg_sl) * positionsize
+            return risk
+        else:
+            return None
+
+
+
 
     def set_outcome(self):  # marge muss durch den be point gesetzt werden wenn trade erstellt wird, point kommt aus dem user
         """
@@ -115,11 +156,14 @@ class Trade_Group:
     # prozentsatz vom pnl relativ zur positionsgröße
     def ps_v_pnl(self):
         size = self.calcpositionsize()
-        return self.pnl/size
-
+        if (len(self.open_trades) != 0):
+            return self.pnl/size
+        else:
+            return None
 
     def calcpositionsize(self):
         size = 0
+
         for trade in self.open_trades:
             size += trade.margin * trade.leverage
         return size

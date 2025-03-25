@@ -1,3 +1,4 @@
+import mexc_api
 import mexc_api as mexc
 import user
 import datetime
@@ -46,31 +47,45 @@ def get_potential_liquidations():
 
 def main():
 
-    testuser = user.User("mx0vglZhYi5s3DgRAi", "9aadf3b2f7bf4be3850ab29404df36f8")
+    testuser = user.User("mx0vgl5QkTbCZtcPVw", "c06ae6c8fc1046f2ac6a693c3b97ec9c")
+    #print(testuser.mexc_accountsize['USDT'])
 
-    testuser.set_be_point(0.1)
+    testuser.get_trades_mexc()
+    testuser.risk_vs_accountsize()
+    """
+    group = user.User(mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50))
+    print(len(group))
+    for position_id, trade_data in group.items():
+        print(f"Position ID: {position_id}")
+        print(trade_data)
+
+        print()"""
+
+    #for tr in testuser.trade_list:
+        #tr.check_liquidation()
+    #mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50)
+    #testuser.set_be_point(0.1)
     #testuser.get_trades_mexc()
-    trades = testuser.text_group_trades_by_key()
-    testuser.create_trade_groups(trades)
-    testuser.positionsize_vs_pnl()
+    #print(testuser.trade_list[38].open_trades)
+    #testuser.get_rr_ratios()
+    #testuser.positionsize_vs_pnl()
 
     #test_group_trades_by_key(testuser) #erster trade fehlt in API output.txt, checken obs wegen timestamp ist.
     #test_get_trades_mexc(testuser)
     #print(len(testuser.trade_list))
 
 
-    #print(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"))
 
     #testuser.trade_frequency_by_day() # Sortierung stimmt noch nicht.
     #testuser.get_pnls()
     #testuser.net_profit()
-    testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
-    print(testuser.winrate)
+    #testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
+    #print(testuser.winrate)
     #testuser.get_outcomes()
     #testuser.long_short_ratio()
     #testuser.get_traded_assets()
     #print(testuser.calc_profitfactor_month())
-    #testuser.get_timestamps()
+    #testuser.get_timestamps() # Hier prüfen für Liquidations ob es richtig erkannt wird.
     #testuser.long_short_winrate()
     #testuser.get_outcomes() # 1 = win -1 = loss
     #testuser.avg_win_loss()
@@ -78,6 +93,7 @@ def main():
     #testuser.get_sl_hitrate()
     #testuser.get_longest_streak()
     #print(testuser.get_liquidations())
+
 
 
 

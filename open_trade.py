@@ -13,6 +13,8 @@ class Open_Trade:
         self.fees = fees  # fees divided by amount of closing trades per position
         self.margin = margin # margin used for trade, e.g. buy 200€ of ETH --> 200 margin
         self.riskreward = None
+        self.tp = tp
+        self.sl = sl
 
 
 
