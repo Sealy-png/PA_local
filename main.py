@@ -53,7 +53,8 @@ def main():
 
     testuser.get_trades_mexc()
     print(testuser.mexc_accountsize)
-    get_potential_liquidations(testuser)
+    #get_potential_liquidations(testuser)
+    testuser.get_timestamps()
     #testuser.get_rr_ratios()
     #testuser.get_liquidations()
     #testuser.get_timestamps()
