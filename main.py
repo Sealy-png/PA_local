@@ -34,12 +34,13 @@ def test_get_trades_mexc(user):
 
 
 
-def get_potential_liquidations():
+def get_potential_liquidations(user):
     #trades = mexc.get_history_orders("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e")['data']
-    history = mexc.get_history_orders("mx0vgl0fxT1zFO7oxA", "6dd81fbf142b43d39def9cc29990c136", start_time=1730415600000, end_time=1737591241739, page_size='100')['data']
-    for trade in history:
-        #if trade['positionId'] == 614813654 or trade['positionId'] == 611556583:
-        print(trade)
+    #history = mexc.get_history_orders(key, secret, start_time=1730415600000, end_time=1737591241739, page_size='100')['data']
+    for tr in user.trade_list:
+        if tr.positionId == 614813654 or tr.positionId == 611556583:
+            print("price: " + str(tr.price) + "    Liquidation price:  " + str(tr.liqprice))
+
 
 
 #print(json.dumps(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"),indent=4))
@@ -52,7 +53,7 @@ def main():
 
     testuser.get_trades_mexc()
     print(testuser.mexc_accountsize)
-    testuser.risk_vs_accountsize()
+    get_potential_liquidations(testuser)
     #testuser.get_rr_ratios()
     #testuser.get_liquidations()
     #testuser.get_timestamps()
