@@ -3,9 +3,10 @@
 
 class Open_Trade:
     #für den fall, dass mehree opening trades gemacht werden, immer "openAvgPrice" nehmen für PNL rechnung
-    def __init__(self, open_type, timestamp, price, leverage, volume, fees, margin, tp, sl):
+    def __init__(self, open_type,position_id, timestamp, price, leverage, volume, fees, margin, tp, sl):
 
         self.openType = open_type  # Isolated (1) oder cross order (2)
+        self.positionID = position_id
         self.timestamp = timestamp  # Timestamp eröffnung (in datum convertieren?)
         self.price = price
         self.leverage = leverage

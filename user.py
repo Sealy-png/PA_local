@@ -19,6 +19,7 @@ class User:
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
         self.api_secret = api_secret
+        self.user_id = 1
         self.trade_list = []
         self.winrate = 0
         self.be_point = 0  # percentage of margin where trade becomes break_even
@@ -50,8 +51,7 @@ class User:
     def get_timestamps(self):
         for tr in self.trade_list:
             # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
-            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,))
-                                                                                    + "    " + str(tr.category) + "   Liquidation Price: " + str(tr.liqprice))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,)) + "    " + str(tr.category) + "   Liquidation Price: " + str(tr.liqprice))
 
     def risk_vs_accountsize(self):
         for trade in self.trade_list:
@@ -63,7 +63,7 @@ class User:
             size = entry["equity"]
             print("RISK:  " + str(round(risk,4)) +  "    result: " +str(round(risk/size, 4)) + "    Time: " + str(str(datetime.fromtimestamp(trade.timestamp / 1000.0,))) )
 
-            #print(trade.trade_risk/accountsize["availableBalance"])
+
 
 
     def get_pnls(self):
@@ -389,6 +389,7 @@ class User:
             for open_trade in open_trades:
                 trade.add_open_trade(Open_Trade(
                     open_type=open_trade['openType'],
+                    position_id= open_trade['positionId'],
                     price=open_trade['price'],
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
@@ -404,6 +405,7 @@ class User:
                 sell_fees = close_trade.get('makerFee', None) + close_trade.get('takerFee', None)
                 trade.add_close_trade(Close_Trade(
                     price=close_trade['dealAvgPrice'],
+                    position_id=close_trade['positionId'],
                     volume=close_trade['dealVol'],
                     timestamp=close_trade['createTime'],
                     profit=close_trade['profit'],

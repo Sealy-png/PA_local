@@ -7,6 +7,7 @@ from close_trade import Close_Trade
 from trade_group import Trade_Group
 import datetime
 import time
+import mysql.connector
 
 import json
 
@@ -44,15 +45,37 @@ def get_potential_liquidations():
 
 #print(json.dumps(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"),indent=4))
 
+conn = mysql.connector.connect(
+    host="localhost",         # oder die IP-Adresse deines MySQL-Servers
+    user="root",
+    password="root",
+    database="pa_db"
+)
+
+
 
 def main():
 
-    testuser = user.User("mx0vgl5QkTbCZtcPVw", "c06ae6c8fc1046f2ac6a693c3b97ec9c")
+    cursor = conn.cursor()
+    cursor.execute("""
+     DESCRIBE trade
+
+                   
+""")
+    for row in cursor.fetchall():
+        print(row)
+
+
+
+    cursor.close()
+    conn.close()
+
+    #testuser = user.User("mx0vgl5QkTbCZtcPVw", "c06ae6c8fc1046f2ac6a693c3b97ec9c")
     #print(testuser.mexc_accountsize['USDT'])
 
-    testuser.get_trades_mexc()
-    print(testuser.mexc_accountsize)
-    testuser.risk_vs_accountsize()
+    #testuser.get_trades_mexc()
+    #print(testuser.mexc_accountsize)
+    #testuser.risk_vs_accountsize()
     #testuser.get_rr_ratios()
     #testuser.get_liquidations()
     #testuser.get_timestamps()

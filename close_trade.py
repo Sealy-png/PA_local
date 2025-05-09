@@ -3,8 +3,9 @@
 
 class Close_Trade:
 
-    def __init__(self, price, volume, timestamp, fees, profit):
+    def __init__(self, price,position_id, volume, timestamp, fees, profit):
         self.price = price
+        self.positionID = position_id
         self.volume = volume
         self.timestamp = timestamp
         self.fees = fees

@@ -8,7 +8,7 @@ class Trade_Group:
         self.open_trades = []
         self.close_trades = []
         self.price = 0  # average of all open trade prices (relative to volume)
-        self.pnl = 0  # aus API profit - alle makker/takerfees
+        self.pnl = 0  # aus API profit - alle maker/takerfees
         self.tp_hit = False
         self.sl_hit = False
         self.be_point = be_point
