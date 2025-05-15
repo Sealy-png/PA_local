@@ -1,24 +1,23 @@
 class Trade_Group:
 
-    def __init__(self, positionId, side, pair, category, be_point):  # outcomepoint für BE rechnung
+    def __init__(self, positionId, side, pair, be_point):  # outcomepoint für BE rechnung
         self.positionId = positionId
         self.side = side  # 2 = short, 4 = long
         self.pair = pair   # Coin pair, e.g. BTCUSDT, ETH, etc.
-        self.category = category  # 2 = liquidation?
         self.open_trades = []
         self.close_trades = []
-        self.price = 0  # average of all open trade prices (relative to volume)
-        self.pnl = 0  # aus API profit - alle maker/takerfees
+        self.price = 0  #  double || average of all open trade prices (relative to volume)
+        self.pnl = 0  #  double || aus API profit - alle maker/takerfees
         self.tp_hit = False
         self.sl_hit = False
-        self.be_point = be_point
+        self.be_point = be_point #double
         self.outcome = 0  # -1 = loss, 0 = break evenn, 1 = profit
-        self.fees = 0
-        self.risk_reward = 0
-        self.timestamp = None
-        self.total_margin = 0
-        self.liqprice = None
-        self.risk = 0
+        self.fees = 0 #double
+        self.risk_reward = 0 #double
+        self.timestamp = None #long
+        self.total_margin = 0 #double
+        self.liqprice = None #double
+        self.risk = 0 #double
         self.is_liquidated = False
 
 

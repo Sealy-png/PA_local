@@ -453,7 +453,7 @@ class User:
 
         :return: Dictionary with grouped trades
         """
-        file_path = 'C:\\Users\\Ammar\\PycharmProjects\\PA_local\\output.txt'
+        file_path = 'output.txt'
         with open(file_path, 'r') as file:
             data = json.load(file)
         grouped = {}
@@ -498,7 +498,7 @@ class User:
             # Create a TradeGroup for each sell trade
             template = close_trades[0]
             trade = Trade_Group(positionId=position_id, side=template['side'], pair=template['symbol'],
-                                category=template['category'], be_point=self.be_point)
+                                be_point=self.be_point)
 
 
             # Add all buy trades to the trade group

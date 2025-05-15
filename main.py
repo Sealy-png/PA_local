@@ -58,22 +58,24 @@ def main():
 
     cursor = conn.cursor()
     cursor.execute("""
-     DESCRIBE trade
-
+        DESCRIBE trade
                    
-""")
-    for row in cursor.fetchall():
-        print(row)
+    """)
+
+    for table in cursor.fetchall():
+        print(table)
 
 
 
     cursor.close()
     conn.close()
 
+
     #testuser = user.User("mx0vgl5QkTbCZtcPVw", "c06ae6c8fc1046f2ac6a693c3b97ec9c")
     #print(testuser.mexc_accountsize['USDT'])
 
-    #testuser.get_trades_mexc()
+    #trades =testuser.text_group_trades_by_key()
+    #testuser.text_create_trade_groups(trades)
     #print(testuser.mexc_accountsize)
     #testuser.risk_vs_accountsize()
     #testuser.get_rr_ratios()
