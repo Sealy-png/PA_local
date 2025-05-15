@@ -1,10 +1,9 @@
-from audioop import avgpp
+import json
+import time
 from collections import defaultdict
 from datetime import datetime, timedelta
-import time
-import json
-import os
 
+import Database_Handler
 import mexc_api as mexc
 from close_trade import Close_Trade
 from open_trade import Open_Trade
@@ -24,7 +23,15 @@ class User:
         self.winrate = 0
         self.be_point = 0  # percentage of margin where trade becomes break_even
         self.mexc_accountsize = {}
-        self.set_mexc_accountsize(mexc.get_account_assets(self.api_key,self.api_secret))
+        self.set_mexc_accountsize(mexc.get_account_assets(self.api_key, self.api_secret))
+
+    def add_list_to_database(self):
+        for trade in self.trade_list:
+            Database_Handler.add_trade_group(trade)
+            for open in trade.open_trades:
+                Database_Handler.add_trade(open)
+            for close in trade.close_trades:
+                Database_Handler.add_trade(close)
 
     def set_mexc_accountsize(self, api_response):
         """
@@ -39,49 +46,47 @@ class User:
                 if currency:
                     # Store whatever values you care about
                     self.mexc_accountsize[currency] = {
-                        #"availableBalance": entry.get("availableBalance", 0),
+                        # "availableBalance": entry.get("availableBalance", 0),
                         "equity": entry.get("equity", 0),
-                        #"cashBalance": entry.get("cashBalance", 0)
+                        # "cashBalance": entry.get("cashBalance", 0)
                         # add more fields if needed
                         }
 
-    def set_be_point(self, point):  #Should be created during intitializationn for usage, only to save dev time. Given in whole numbers:  1 = 1%
-        self.be_point = point/100
+    def set_be_point(self,
+                     point):  # Should be created during intitializationn for usage, only to save dev time. Given in whole numbers:  1 = 1%
+        self.be_point = point / 100
 
     def get_timestamps(self):
         for tr in self.trade_list:
             # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
-            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,)) + "    " + str(tr.category) + "   Liquidation Price: " + str(tr.liqprice))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0, )) + "    " + str(
+                tr.category) + "   Liquidation Price: " + str(tr.liqprice))
 
     def risk_vs_accountsize(self):
         for trade in self.trade_list:
             risk = trade.trade_risk()
-            if(risk == None):
+            if (risk == None):
                 continue
             pair = trade.pair.split("_")[1]
             entry = self.mexc_accountsize[pair]
             size = entry["equity"]
-            print("RISK:  " + str(round(risk,4)) +  "    result: " +str(round(risk/size, 4)) + "    Time: " + str(str(datetime.fromtimestamp(trade.timestamp / 1000.0,))) )
-
-
-
+            print("RISK:  " + str(round(risk, 4)) + "    result: " + str(round(risk / size, 4)) + "    Time: " + str(
+                str(datetime.fromtimestamp(trade.timestamp / 1000.0, ))))
 
     def get_pnls(self):
         for trade in self.trade_list:
             print(trade.pnl)
 
-
-
-    def get_winrate(self): # Hier trades pro positionId
+    def get_winrate(self):  # Hier trades pro positionId
         won = 0
         for tr in self.trade_list:
             Trade_Group.set_pnl(tr)
             if tr.outcome == 1:
                 won += 1
-        if(won != 0):
+        if (won != 0):
             self.winrate = (won / len(self.trade_list)) * 100
         else:
-            self.winrate= 0
+            self.winrate = 0
 
     def get_traded_assets(self):
         assets = {}
@@ -112,50 +117,47 @@ class User:
 
         print(net)
 
-
-
     def get_outcomes(self):
         for trade in self.trade_list:
-            #print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
+            # print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
             print(trade.outcome)
 
     def get_rr_ratios(self):
         for index, trade in enumerate(self.trade_list):
             if trade.risk_reward != None:
-                print("TP: " + str(trade.open_trades[0].tp) +  "  |  Price: "
-                      + str(trade.open_trades[0].price) + "  |  SL: " + str(trade.open_trades[0].sl) + "  |  RR-Ratio: " + str(round(trade.risk_reward, 4)))
-                #for open in trade.open_trades:
-                   # print(open.riskreward)
-                #print(str(trade.risk_reward))
-                #print(f"Index: {index}, Trade: {trade}")
+                print("TP: " + str(trade.open_trades[0].tp) + "  |  Price: "
+                      + str(trade.open_trades[0].price) + "  |  SL: " + str(
+                    trade.open_trades[0].sl) + "  |  RR-Ratio: " + str(round(trade.risk_reward, 4)))
+                # for open in trade.open_trades:
+                # print(open.riskreward)
+                # print(str(trade.risk_reward))
+                # print(f"Index: {index}, Trade: {trade}")
 
     def calc_profitfactor_month(self):
-        #get all trades within last 30 days
+        # get all trades within last 30 days
         thirty_days_ago_ms = round(time.time() * 1000) - (30 * 24 * 60 * 60 * 1000)
         lastmonth_list = []
         for trade in self.trade_list:
-            if(trade.timestamp > thirty_days_ago_ms):
+            if (trade.timestamp > thirty_days_ago_ms):
                 lastmonth_list.append(trade)
         # get total wins and losses
         total_won = 0
         total_lost = 0
         for trade in lastmonth_list:
-            #print(trade.pnl)
-            if(trade.pnl >= 0):
+            # print(trade.pnl)
+            if (trade.pnl >= 0):
                 total_won += trade.pnl
             else:
-                total_lost+= trade.pnl
+                total_lost += trade.pnl
 
         print(total_lost)
         print(total_won)
         # return profit/loss
-        factor = abs(total_won/total_lost)
-        if(total_won<total_lost):
-            return -1*factor
+        factor = abs(total_won / total_lost)
+        if (total_won < total_lost):
+            return -1 * factor
         else:
             return factor
-
-
 
     def positionsize_vs_pnl(self):
         avg = 0
@@ -166,11 +168,11 @@ class User:
             counter += 1
             if (len(trade.open_trades) != 0):
                 current = trade.ps_v_pnl()
-                if(current >=0):
+                if (current >= 0):
                     wins.append(current)
                 else:
                     losses.append(current)
-                print(str(round(current,4)) + "   |   " + str(counter))
+                print(str(round(current, 4)) + "   |   " + str(counter))
                 avg += current
         avg_win = 0
         avg_loss = 0
@@ -180,11 +182,11 @@ class User:
         for x in losses:
             avg_loss += x
 
-        avg_win = avg_win/len(self.trade_list)
+        avg_win = avg_win / len(self.trade_list)
         avg_loss = avg_loss / len(self.trade_list)
-        print("average win: " +str(round(avg_win, 4)))
+        print("average win: " + str(round(avg_win, 4)))
         print("average loss: " + str(round(avg_loss, 4)))
-        print("average: "+ str(round(avg/len(self.trade_list), 4)))
+        print("average: " + str(round(avg / len(self.trade_list), 4)))
 
     def trade_frequency_by_day(self):
         trade_by_date = defaultdict(list)
@@ -224,7 +226,6 @@ class User:
             trade_details = [f"positionId = {trade.positionId}, pnl = {trade.pnl}" for _, trade in trades]
             print("; ".join(trade_details))
 
-
     def get_longest_streak(self):
         current_streak = 0
         longest_streak = 0
@@ -248,7 +249,7 @@ class User:
             longest_streak_list = current_streak_list[:]
 
         for tr in longest_streak_list:
-            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0,))
+            print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0, ))
                   + "    " + str(tr.outcome))
         # return longest_streak, longest_streak_list
 
@@ -308,28 +309,12 @@ class User:
         for trade in self.trade_list:
             trade.check_liquidation()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def get_trades_mexc(self):
         # history = mexc.get_history_orders(self.api_key, self.api_secret,start_time=	1730415600000, end_time=1737591241739,page_size='100')['data']
         end = time.time_ns() // 1000000
         start = time.time_ns() // 1000000 - 7776000000
-        history = mexc.get_history_orders(self.api_key, self.api_secret, start_time=start, end_time=end, page_size='100')['data']
+        history = \
+        mexc.get_history_orders(self.api_key, self.api_secret, start_time=start, end_time=end, page_size='100')['data']
         grouped_trades = self.group_trades_by_key(history)
         self.create_trade_groups(grouped_trades)
 
@@ -346,10 +331,8 @@ class User:
             if value not in grouped:
                 grouped[value] = []
             grouped[value].append(trade)
-        #print(len(grouped))
+        # print(len(grouped))
         return grouped
-
-
 
     def create_trade_groups(self, trades):
         """
@@ -361,7 +344,6 @@ class User:
 
         group = self.history_mexc(mexc.history_positions(self.api_key, self.api_secret, 1, 50))
         for position_id, trades in trades.items():
-
 
             # Separate buy and sell trades
             open_trades = [trade for trade in trades if trade['state'] == 3 and (
@@ -382,22 +364,21 @@ class User:
             # Create a TradeGroup for each sell trade
             template = close_trades[0]
             trade = Trade_Group(positionId=position_id, side=template['side'], pair=template['symbol'],
-                                category=template['category'], be_point=self.be_point)
-
+                                be_point=self.be_point)
 
             # Add all buy trades to the trade group
             for open_trade in open_trades:
                 trade.add_open_trade(Open_Trade(
                     open_type=open_trade['openType'],
-                    position_id= open_trade['positionId'],
+                    position_id=open_trade['positionId'],
                     price=open_trade['price'],
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
                     timestamp=open_trade['createTime'],
                     margin=open_trade['usedMargin'],
-                    tp=open_trade.get('takeProfitPrice',None),
+                    tp=open_trade.get('takeProfitPrice', None),
                     sl=open_trade.get('stopLossPrice', None),
-                    fees = buy_fees
+                    fees=buy_fees
                     ))
 
                 # Set the sell trade for the trade group
@@ -412,7 +393,6 @@ class User:
                     fees=sell_fees
                     ))
 
-
             for close_trade in close_trades:
                 if 'externalOid' in close_trade and "STOP_LOSS" in close_trade['externalOid']:
                     trade.set_slhit()
@@ -424,8 +404,6 @@ class User:
             Trade_Group.post_init(trade)
             if trade.positionId in group:
                 trade.liqprice = group[trade.positionId]["liquidatePrice"]
-
-
 
     @staticmethod
     def history_mexc(api_response):
@@ -458,14 +436,14 @@ class User:
             data = json.load(file)
         grouped = {}
         trades = data['data']
-        #print(json.dumps(trades))
+        # print(json.dumps(trades))
 
         for trade in trades:
             value = trade['positionId']
             if value not in grouped:
                 grouped[value] = []
             grouped[value].append(trade)
-        #print(len(grouped))
+        # print(len(grouped))
         return grouped
 
     def text_create_trade_groups(self, trades):
@@ -477,7 +455,6 @@ class User:
         """
         print(len(trades))
         for position_id, trades in trades.items():
-
 
             # Separate buy and sell trades
             open_trades = [trade for trade in trades if trade['state'] == 3 and (
@@ -500,19 +477,18 @@ class User:
             trade = Trade_Group(positionId=position_id, side=template['side'], pair=template['symbol'],
                                 be_point=self.be_point)
 
-
             # Add all buy trades to the trade group
             for open_trade in open_trades:
                 trade.add_open_trade(Open_Trade(
                     open_type=open_trade['openType'],
-                    price=open_trade['dealAvgPrice'], #ehemals 'price' falls probleme aufkommen
+                    price=open_trade['dealAvgPrice'],  # ehemals 'price' falls probleme aufkommen
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
                     timestamp=open_trade['createTime'],
                     margin=open_trade['usedMargin'],
-                    tp=open_trade.get('takeProfitPrice',None),
+                    tp=open_trade.get('takeProfitPrice', None),
                     sl=open_trade.get('stopLossPrice', None),
-                    fees = buy_fees
+                    fees=buy_fees
                     ))
 
                 # Set the sell trade for the trade group
@@ -525,7 +501,6 @@ class User:
                     profit=close_trade['profit'],
                     fees=sell_fees
                     ))
-
 
             for close_trade in close_trades:
                 if 'externalOid' in close_trade and "STOP_LOSS" in close_trade['externalOid']:

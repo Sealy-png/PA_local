@@ -58,7 +58,8 @@ def main():
 
     cursor = conn.cursor()
     cursor.execute("""
-        DESCRIBE trade
+        DESCRIBE trade_group
+
                    
     """)
 
