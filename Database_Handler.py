@@ -28,7 +28,7 @@ def add_trade(trade):
     cursor = conn.cursor()
 
 
-
+# Determine wether trade is open
     trade_type = None
     if isinstance(trade, Close_Trade):
         trade_type = "close"
@@ -45,7 +45,7 @@ def add_trade(trade):
         """
 
     values = (
-        trade.position_ID,
+        trade.positionID,
         trade.timestamp,
         trade_type,
         getattr(trade, 'price', None),
@@ -72,15 +72,77 @@ def check_existing_trade(position_ID):
     :param position_ID:
     :return: exists: Boolean value, True = exists, False = doesn't exist
     """
-    pass
+    conn = get_connection()
+    cursor = conn.cursor()
 
-def add_trade_group(trade_group):
+    cursor.execute("""
+            SELECT position_ID FROM trade_group WHERE position_ID = %s
+        """, (position_ID,))
+    result = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    exists = result is not  None
+    return exists
+
+
+def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
     """
     Adds a trade_group to the trade_group table
     :param trade_group: trade group object to be added to the table
     :return: void
     """
-    pass
+    conn = get_connection()
+    cursor = conn.cursor()
+
+
+
+    query = """
+                INSERT INTO trade_group (
+                    user_ID, position_ID, side, pair, price, pnl, tp_hit, sl_hit, be_point, 
+                    outcome, fees, risk_reward, timestamp,
+                    total_margin, liqprice, risk, is_liquidated, setup_tag, mistake_tag
+                    
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                )
+            """
+
+    values = (
+        1,
+        getattr(trade_group, 'positionId'),
+        getattr(trade_group, 'side'),
+        getattr(trade_group, 'pair'),
+        getattr(trade_group, 'price'),
+        getattr(trade_group, 'pnl'),
+        getattr(trade_group, 'tp_hit'),
+        getattr(trade_group, 'sl_hit'),
+        getattr(trade_group, 'be_point'),
+        getattr(trade_group, 'outcome'),
+        getattr(trade_group, 'fees'),
+        getattr(trade_group, 'risk_reward'),
+        getattr(trade_group, 'timestamp'),
+        getattr(trade_group, 'total_margin'),
+        getattr(trade_group, 'liqprice'),
+        getattr(trade_group, 'risk'),
+        getattr(trade_group, 'is_liquidated'),
+        setup_tag,
+        mistake_tag # Both tags are optional
+    )
+    cursor.execute(query, values)
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    for trade in trade_group.open_trades:
+        add_trade(trade)
+
+    for trade in trade_group.close_trades:
+        add_trade(trade)
+
 
 
 

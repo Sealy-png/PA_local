@@ -40,16 +40,22 @@ def get_connection():
 )
 def new_risk_vs_accountsize(userID):
     conn = get_connection()
-    cursor = conn.cursor()
+    trade_cursor = conn.cursor()
+    asset_cursor = conn.cursor()
 
-    cursor.execute("""
-    SELECT risk, pair
+    asset_cursor.execute("""
+    SELECT 
+    """)
+
+    trade_cursor.execute("""
+    SELECT risk,pair
     FROM trade_group
     WHERE risk != NULL
     """)
-    result = cursor.fetchall()
+    result = trade_cursor.fetchall()
 
-    for pair in result
+    for pair in result:
+        pass
 
 
 
