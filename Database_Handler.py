@@ -93,6 +93,13 @@ def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
     :param trade_group: trade group object to be added to the table
     :return: void
     """
+    cancel = check_existing_trade(getattr(trade_group, 'positionId'))
+
+    # if Check for existing trade returns true, insertion is cancelled.
+    if cancel:
+        return
+
+
     conn = get_connection()
     cursor = conn.cursor()
 

@@ -139,10 +139,10 @@ def main():
     testuser.add_list_to_database()
     """
 
-    #get_trade_groups()
+    get_trade_groups()
     #get_single_trade()
     #wipe_trade_tables()
-
+    #print(Trade_Analyzer.get_sl_hitrate())
 
 
 

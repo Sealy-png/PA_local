@@ -61,21 +61,27 @@ def new_risk_vs_accountsize(userID):
 
 
 
-def get_pnls(self):
-    for trade in self.trade_list:
-        print(trade.pnl)
+def get_pnls(mistake =None, setup=None):
+    columns = ["pnl"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+    for trade in trades:
+        print(trade["pnl"])
 
 
-def get_winrate(self):  # Hier trades pro positionId
+def get_winrate(mistake =None, setup=None):  # Hier trades pro positionId
     won = 0
-    for tr in self.trade_list:
-        Trade_Group.set_pnl(tr)
-        if tr.outcome == 1:
+
+    columns = ["outcome"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+    for tr in trades:
+        if tr["outcome"] == 1:
             won += 1
+
+    winrate = 0
     if (won != 0):
-        self.winrate = (won / len(self.trade_list)) * 100
+        winrate = (won / len(trades)) * 100
     else:
-        self.winrate = 0
+        winrate = 0
 
 
 def get_traded_assets(self):
@@ -89,35 +95,48 @@ def get_traded_assets(self):
     print(assets)
 
 
-def long_short_ratio(self):
+def long_short_ratio(mistake =None, setup=None):
     longs = 0
     shorts = 0
-    for trade in self.trade_list:
-        if trade.side == 2:
+
+    columns = ["side"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+
+    for trade in trades:
+        if trade["side"] == 2:
             shorts += 1
-        if trade.side == 4:
+        if trade["side"] == 4:
             longs += 1
 
     print("total trades: " + str(len(self.trade_list)))
     print("long / short ratio: " + str(longs) + " / " + str(shorts))
 
 
-def net_profit(self):
+def net_profit(mistake =None, setup=None):
     net = 0
-    for trade in self.trade_list:
-        net += trade.pnl
+
+    columns = ["pnl"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+    for trade in trades:
+        net += trade["pnl"]
 
     print(net)
 
 
-def get_outcomes(self):
-    for trade in self.trade_list:
+def get_outcomes(mistake =None, setup=None):
+    columns = ["outcome"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+    for trade in trades:
         # print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
-        print(trade.outcome)
+        print(trade["outcome"])
 
 
-def get_rr_ratios(self):
-    for index, trade in enumerate(self.trade_list):
+def get_rr_ratios(self, mistake=None, setup=None):
+
+    columns = ["timestamp", "pnl","risk_reward"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+    # benötigt 2 calls auf die Datenbank da hier auch single trades gefragt sind und nicht nur trade groups
+    for trade in trades:
         if trade.risk_reward != None:
             print("TP: " + str(trade.open_trades[0].tp) + "  |  Price: "
                   + str(trade.open_trades[0].price) + "  |  SL: " + str(
@@ -128,22 +147,26 @@ def get_rr_ratios(self):
             # print(f"Index: {index}, Trade: {trade}")
 
 
-def calc_profitfactor_month(self):
+def calc_profitfactor_month(mistake=None, setup=None):
     # get all trades within last 30 days
     thirty_days_ago_ms = round(time.time() * 1000) - (30 * 24 * 60 * 60 * 1000)
     lastmonth_list = []
-    for trade in self.trade_list:
-        if (trade.timestamp > thirty_days_ago_ms):
+
+    columns = ["timestamp","pnl"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+
+    for trade in trades:
+        if (trade["timestamp"] > thirty_days_ago_ms):
             lastmonth_list.append(trade)
     # get total wins and losses
     total_won = 0
     total_lost = 0
     for trade in lastmonth_list:
         # print(trade.pnl)
-        if (trade.pnl >= 0):
-            total_won += trade.pnl
+        if (trade["pnl"] >= 0):
+            total_won += trade["pnl"]
         else:
-            total_lost += trade.pnl
+            total_lost += trade["pnl"]
 
     print(total_lost)
     print(total_won)
@@ -225,14 +248,17 @@ def trade_frequency_by_week(self):
         print("; ".join(trade_details))
 
 
-def get_longest_streak(self):
+def get_longest_streak(self, mistake, setup):
     current_streak = 0
     longest_streak = 0
     current_streak_list = []
     longest_streak_list = []
 
-    for trade in self.trade_list:
-        if trade.outcome == 1:
+    columns = ["position_ID", "outcome", "timestamp"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+
+    for trade in trades:
+        if trade["outcome"] == 1:
             current_streak += 1
             current_streak_list.append(trade)
         else:
@@ -248,21 +274,22 @@ def get_longest_streak(self):
         longest_streak_list = current_streak_list[:]
 
     for tr in longest_streak_list:
-        print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0, ))
-              + "    " + str(tr.outcome))
+        print(str(tr["position_ID"]) + "   " + str(datetime.fromtimestamp(tr["timestamp"] / 1000.0, ))
+              + "    " + str(tr["outcome"]))
     # return longest_streak, longest_streak_list
 
 
 def call_db(columns=None, table=None, mistake=None, setup=None):
     """
     Quick way to access necessary database output in the form of a list of tuples. Will only return columns specified
-    in columns param. Cannot handle other WHERE filters besides mistake and setup tags
+    in columns param. table needs to be specified, otherwise trade_group is the default table.
+    Cannot handle other WHERE filters besides mistake and setup tags
 
     :param columns: list of columns which should be included in SELECT
     :param table: specifies table from which function selects
     :param mistake: filter for WHERE
     :param setup: filter for WHERE
-    :return:
+    :return: list of rows as tuples
     """
     conn = None
     cursor = None
@@ -312,7 +339,7 @@ def call_db(columns=None, table=None, mistake=None, setup=None):
 
     try:
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         # build query
 
@@ -352,7 +379,7 @@ def call_db(columns=None, table=None, mistake=None, setup=None):
 
 
 
-def long_short_winrate(mistake=None, setup=None):
+def long_short_winrate(mistake = None, setup = None):
     """
     iterates over all trades according to tags given in the function and calculates winrates for shorts and longs
     respectively. If no tags are given, calculates winrates for all trades in database
@@ -370,11 +397,11 @@ def long_short_winrate(mistake=None, setup=None):
     shortrate = 0
     for tr in trades:
 
-        if tr["side"] == 2:
+        if tr["side"] == "2":
             shortamount += 1
             if tr["outcome"] == 1:
                 shortrate += 1
-        if tr["side"] == 4:
+        if tr["side"] == "4":
             longamount += 1
             if tr["outcome"] == 1:
                 longrate += 1
@@ -388,35 +415,39 @@ def long_short_winrate(mistake=None, setup=None):
 
 
 
-def get_tp_hitrate(self):
+def get_tp_hitrate(mistake = None, setup = None):
     hits = 0
-    for trade in self.trade_list:
-        if trade.tp_hit:
+    trades = call_db(["tp_hit"], "trade_group", mistake, setup)
+    for trade in trades:
+        if trade["tp_hit"] == 1:
             hits += 1
-    print("TP hitrate: " + str(round((hits / len(self.trade_list)) * 100, 2)) + "%")
+    print("TP hitrate: " + str(round((hits / len(trades)) * 100, 2)) + "%")
 
 
-def get_sl_hitrate(self):
+def get_sl_hitrate(mistake = None, setup = None):
     hits = 0
-    for trade in self.trade_list:
-        if trade.sl_hit:
+    trades = call_db(["sl_hit"], "trade_group", mistake, setup)
+    for trade in trades:
+        if trade["sl_hit"] == 1:
             hits += 1
-    print("SL hitrate: " + str(round((hits / len(self.trade_list)) * 100, 2)) + "%")
+    print("SL hitrate: " + str(round((hits / len(trades)) * 100, 2)) + "%")
 
 
-def avg_win_loss(self):
+def avg_win_loss(self, mistake = None, setup = None):
     wins = 0
     winval = 0
     losses = 0
     lossval = 0
-    for tr in self.trade_list:
-        Trade_Group.post_init(tr)
-        if tr.pnl > 0:
+
+    trades = call_db(["outcome", "pnl"], "trade_group", mistake, setup)
+
+    for tr in trades:
+        if tr["pnl"] > 0:
             wins += 1
-            winval += tr.pnl
-        elif tr.pnl < 0:
+            winval += tr["pnl"]
+        elif tr["pnl"] < 0:
             losses += 1
-            lossval += tr.pnl
+            lossval += tr["pnl"]
 
     avgwin = winval / wins
     avgloss = lossval / losses
@@ -424,6 +455,10 @@ def avg_win_loss(self):
     print("Average amount won: " + str(avgwin) + " || Average amount lost: " + str(avgloss))
 
 
-def get_liquidations(self):
-    for trade in self.trade_list:
-        trade.check_liquidation()
+def get_liquidations(mistake = None, setup = None):
+    trades = call_db(["position_ID","is_liquidated" ], "trade_group", mistake, setup)
+    liquidations = []
+
+    for trade in trades:
+        if trade["is_liquidated"] == 1:
+            liquidations.append(trade["position_ID"])
