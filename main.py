@@ -1,3 +1,4 @@
+import Trade_Analyzer
 import mexc_api
 import mexc_api as mexc
 import user
@@ -137,7 +138,10 @@ def main():
 
     testuser.add_list_to_database()
     """
-    get_trade_groups()
+
+    #get_trade_groups()
+    #get_single_trade()
+    #wipe_trade_tables()
 
 
 

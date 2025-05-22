@@ -253,24 +253,139 @@ def get_longest_streak(self):
     # return longest_streak, longest_streak_list
 
 
-def long_short_winrate(self):
+def call_db(columns=None, table=None, mistake=None, setup=None):
+    """
+    Quick way to access necessary database output in the form of a list of tuples. Will only return columns specified
+    in columns param. Cannot handle other WHERE filters besides mistake and setup tags
+
+    :param columns: list of columns which should be included in SELECT
+    :param table: specifies table from which function selects
+    :param mistake: filter for WHERE
+    :param setup: filter for WHERE
+    :return:
+    """
+    conn = None
+    cursor = None
+
+    ALLOWED_TABLES = {"trade_group", "trade"}
+    ALLOWED_COLUMNS = {
+        # Trade table columns
+        "trade_ID",  # (if present in your schema)
+        "position_ID",
+        "timestamp",
+        "type",
+        "price",
+        "raw_profit",
+        "profit",
+        "leverage",
+        "volume",
+        "margin",
+        "tp",
+        "sl",
+        "setup_tag",
+        "mistake_tag",
+
+        # trade_group table columns
+        "user_ID",
+        "side",
+        "pair",
+        "pnl",
+        "tp_hit",
+        "sl_hit",
+        "be_point",
+        "outcome",
+        "fees",
+        "risk_reward",
+        "total_margin",
+        "liqprice",
+        "risk",
+        "is_liquidated"
+        }
+
+    if table is not None:
+        if table not in ALLOWED_TABLES:
+            raise ValueError(f"Invalid table name: {table}")
+    if columns is not None:
+        for col in columns:
+            if col not in ALLOWED_COLUMNS:
+                raise ValueError(f"invalid column: {col}")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # build query
+
+        column_string = ", ".join(columns) if columns is not None else "*"
+        table_string = f"{table}" if table is not None else "trade_group"
+        base_query = f"SELECT {column_string} FROM {table_string}"
+        conditions = []
+        values = []
+
+        if setup is not None:
+            conditions.append("setup_tag = %s")
+            values.append(setup)
+        if mistake is not None:
+            conditions.append("mistake_tag = %s")
+            values.append(mistake)
+
+        if conditions:
+            query = base_query + " WHERE " + " AND ".join(conditions)
+        else:
+            query = base_query
+
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+
+        return result
+
+
+    finally:
+
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
+
+
+
+
+
+def long_short_winrate(mistake=None, setup=None):
+    """
+    iterates over all trades according to tags given in the function and calculates winrates for shorts and longs
+    respectively. If no tags are given, calculates winrates for all trades in database
+
+    :param mistake: mistake tag to filter
+    :param setup: setup tag to filter
+    :return: simply prints value, is not saved anywhere
+    """
+    columns = ["side", "outcome"]
+    trades = call_db(columns, "trade_group", mistake, setup)
+
     longamount = 0
     longrate = 0
     shortamount = 0
     shortrate = 0
-    for tr in self.trade_list:
-        Trade_Group.post_init(tr)
-        if tr.side == 2:
+    for tr in trades:
+
+        if tr["side"] == 2:
             shortamount += 1
-            if tr.pnl > 0:
+            if tr["outcome"] == 1:
                 shortrate += 1
-        if tr.side == 4:
+        if tr["side"] == 4:
             longamount += 1
-            if tr.pnl > 0:
+            if tr["outcome"] == 1:
                 longrate += 1
     shortwinrate = (shortrate / shortamount) * 100
     longwinrate = (longrate / longamount) * 100
-    print(" Winrate shorts: " + str(shortwinrate) + " || Winrate longs: " + str(longwinrate))
+
+    return f"Winrate shorts: {shortwinrate} || Winrate longs: {longwinrate}"
+
+    #return (" Winrate shorts: " + str(shortwinrate) + " || Winrate longs: " + str(longwinrate))
+
+
 
 
 def get_tp_hitrate(self):
