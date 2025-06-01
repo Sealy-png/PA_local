@@ -19,58 +19,6 @@ import Database_Handler
 
 
 
-"""
-CREATE TABLE trade_group (
-    user_ID INT NOT NULL,
-    position_ID INT NOT NULL PRIMARY KEY,
-    side VARCHAR(5),
-    pair VARCHAR(20),
-    price DOUBLE,
-    pnl DOUBLE,
-    tp_hit TINYINT(1),
-    sl_hit TINYINT(1),
-    be_point DOUBLE,
-    outcome TINYINT,
-    fees DOUBLE,
-    risk_reward DOUBLE,
-    timestamp BIGINT,
-    total_margin DOUBLE,
-    liqprice DOUBLE,
-    risk DOUBLE,
-    is_liquidated TINYINT(1),
-    setup_tag VARCHAR(25),
-    mistake_tag VARCHAR(25),
-    INDEX (user_ID)  -- corresponds to 'MUL' on user_ID
-);
-
-CREATE TABLE trade (
-    trade_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    position_ID INT NOT NULL,
-    type VARCHAR(25),
-    timestamp BIGINT NOT NULL,
-    price DOUBLE,
-    raw_profit DOUBLE,
-    profit DOUBLE,
-    leverage DOUBLE,
-    volume DOUBLE,
-    margin DOUBLE,
-    tp DOUBLE,
-    sl DOUBLE,
-    INDEX (position_ID)
-);
-
-
-CREATE TABLE user (
-    USER_ID INT NOT NULL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    level INT,
-    API_KEY VARCHAR(255),
-    API_SECRET VARCHAR(255)
-);
-
-
-"""
-
 
 def test_group_trades_by_key(user):
     testuser = user
@@ -215,11 +163,96 @@ def quick_add_db():
     testuser.add_list_to_database()
 
 
+"""
+CREATE TABLE trade_group (
+    user_ID INT NOT NULL,
+    position_ID INT NOT NULL PRIMARY KEY,
+    side VARCHAR(5),
+    pair VARCHAR(20),
+    price DOUBLE,
+    pnl DOUBLE,
+    tp_hit TINYINT(1),
+    sl_hit TINYINT(1),
+    be_point DOUBLE,
+    outcome TINYINT,
+    fees DOUBLE,
+    risk_reward DOUBLE,
+    timestamp BIGINT,
+    total_margin DOUBLE,
+    liqprice DOUBLE,
+    risk DOUBLE,
+    is_liquidated TINYINT(1),
+    setup_tag VARCHAR(25),
+    mistake_tag VARCHAR(25),
+    INDEX (user_ID)  -- corresponds to 'MUL' on user_ID
+);
+
+CREATE TABLE trade (
+    trade_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    position_ID INT NOT NULL,
+    type VARCHAR(25),
+    timestamp BIGINT NOT NULL,
+    price DOUBLE,
+    raw_profit DOUBLE,
+    profit DOUBLE,
+    leverage DOUBLE,
+    volume DOUBLE,
+    margin DOUBLE,
+    tp DOUBLE,
+    sl DOUBLE,
+    INDEX (position_ID)
+);
+
+
+CREATE TABLE user (
+    USER_ID INT NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    level INT,
+    API_KEY VARCHAR(255),
+    API_SECRET VARCHAR(255)
+);
+
+
+"""
+
 
 
 def main():
 
-    get_trade_tags()
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+   
+CREATE TABLE trade_group (
+    user_ID INT NOT NULL,
+    group_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    position_ID INT NOT NULL,
+    side VARCHAR(5),
+    pair VARCHAR(20),
+    price DOUBLE,
+    pnl DOUBLE,
+    tp_hit TINYINT(1),
+    sl_hit TINYINT(1),
+    be_point DOUBLE,
+    outcome TINYINT,
+    fees DOUBLE,
+    risk_reward DOUBLE,
+    timestamp BIGINT,
+    total_margin DOUBLE,
+    liqprice DOUBLE,
+    risk DOUBLE,
+    is_liquidated TINYINT(1),
+    setup_tag VARCHAR(25),
+    mistake_tag VARCHAR(25),
+    INDEX (user_ID)  -- corresponds to 'MUL' on user_ID
+);
+    """)
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
 
 
     #get_trade_groups()
