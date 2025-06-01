@@ -240,12 +240,7 @@ CREATE TABLE trade (
 """
 
 def drop_all_tables():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="your_password",
-        database="your_database"
-    )
+    conn = get_connection()
     cursor = conn.cursor()
 
     try:
@@ -271,28 +266,18 @@ def main():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SET FOREIGN_KEY_CHECKS = 0;
+    describe user
 
--- Drop tables (order matters if foreign keys exist)
-DROP TABLE IF EXISTS trade;
-DROP TABLE IF EXISTS trade_group_tags;
-DROP TABLE IF EXISTS tags;
-DROP TABLE IF EXISTS trade_group;
-DROP TABLE IF EXISTS user;
 
--- Re-enable foreign key checks
-SET FOREIGN_KEY_CHECKS = 1;
     """)
 
     for row in cursor:
         print(row)
 
-
     conn.commit()
 
     cursor.close()
     conn.close()
-
 
     #get_trade_groups()
 
