@@ -164,9 +164,37 @@ def quick_add_db():
 
 
 """
-CREATE TABLE trade_group (
+
+
+CREATE TABLE trade_group_tags (
+    trade_group_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (trade_group_id, tag_id),
+    FOREIGN KEY (trade_group_id) REFERENCES trade_group(group_ID) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
+);
+
+CREATE TABLE tags (
+    tag_id INT NOT NULL AUTO_INCREMENT,
     user_ID INT NOT NULL,
-    position_ID INT NOT NULL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    PRIMARY KEY (tag_id),
+    FOREIGN KEY (user_ID) REFERENCES user(user_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE user (
+    USER_ID INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    level INT,
+    API_KEY VARCHAR(255),
+    API_SECRET VARCHAR(255),
+    PRIMARY KEY (USER_ID)
+);
+
+CREATE TABLE trade_group (
+    group_ID INT NOT NULL AUTO_INCREMENT,
+    user_ID INT NOT NULL,
+    position_ID INT NOT NULL,
     side VARCHAR(5),
     pair VARCHAR(20),
     price DOUBLE,
@@ -184,11 +212,13 @@ CREATE TABLE trade_group (
     is_liquidated TINYINT(1),
     setup_tag VARCHAR(25),
     mistake_tag VARCHAR(25),
-    INDEX (user_ID)  -- corresponds to 'MUL' on user_ID
+    PRIMARY KEY (group_ID),
+    INDEX (user_ID)
 );
 
+
 CREATE TABLE trade (
-    trade_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    trade_ID INT NOT NULL AUTO_INCREMENT,
     position_ID INT NOT NULL,
     type VARCHAR(25),
     timestamp BIGINT NOT NULL,
@@ -200,18 +230,12 @@ CREATE TABLE trade (
     margin DOUBLE,
     tp DOUBLE,
     sl DOUBLE,
-    INDEX (position_ID)
+    group_ID INT,
+    PRIMARY KEY (trade_ID),
+    INDEX (position_ID),
+    INDEX (group_ID),
+    FOREIGN KEY (group_ID) REFERENCES trade_group(group_ID) ON DELETE CASCADE
 );
-
-
-CREATE TABLE user (
-    USER_ID INT NOT NULL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    level INT,
-    API_KEY VARCHAR(255),
-    API_SECRET VARCHAR(255)
-);
-
 
 """
 
@@ -223,7 +247,17 @@ def main():
     cursor = conn.cursor()
 
     cursor.execute("""
-    describe trade_group_tags
+    SET FOREIGN_KEY_CHECKS = 0;
+
+-- Drop tables (order matters if foreign keys exist)
+DROP TABLE IF EXISTS trade;
+DROP TABLE IF EXISTS trade_group_tags;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS trade_group;
+DROP TABLE IF EXISTS user;
+
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
     """)
 
     for row in cursor:
