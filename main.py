@@ -223,31 +223,12 @@ def main():
     cursor = conn.cursor()
 
     cursor.execute("""
-   
-CREATE TABLE trade_group (
-    user_ID INT NOT NULL,
-    group_ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    position_ID INT NOT NULL,
-    side VARCHAR(5),
-    pair VARCHAR(20),
-    price DOUBLE,
-    pnl DOUBLE,
-    tp_hit TINYINT(1),
-    sl_hit TINYINT(1),
-    be_point DOUBLE,
-    outcome TINYINT,
-    fees DOUBLE,
-    risk_reward DOUBLE,
-    timestamp BIGINT,
-    total_margin DOUBLE,
-    liqprice DOUBLE,
-    risk DOUBLE,
-    is_liquidated TINYINT(1),
-    setup_tag VARCHAR(25),
-    mistake_tag VARCHAR(25),
-    INDEX (user_ID)  -- corresponds to 'MUL' on user_ID
-);
+    describe trade_group_tags
     """)
+
+    for row in cursor:
+        print(row)
+
 
     conn.commit()
 
