@@ -220,73 +220,10 @@ def quick_add_db():
 def main():
 
     get_trade_tags()
-    #697550603
-
-
-
-
 
 
     #get_trade_groups()
 
-    #get_trade_groups()
-    #get_single_trade()
-    #wipe_trade_tables()
-    #print(Trade_Analyzer.get_sl_hitrate())
-
-
-
-    #trades =testuser.text_group_trades_by_key()
-    #testuser.text_create_trade_groups(trades)
-    #print(testuser.mexc_accountsize)
-    #testuser.risk_vs_accountsize()
-    #testuser.get_rr_ratios()
-    #testuser.get_liquidations()
-    #testuser.get_timestamps()
-    #print(mexc.get_history_orders(testuser.api_key, testuser.api_secret, page_size='100', )['data'])
-    #testuser.risk_vs_accountsize()
-
-    """
-    group = mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50)
-    print(len(group))
-    for position_id, trade_data in group.items():
-        print(f"Position ID: {position_id}")
-        print(trade_data)
-
-        print()
-"""
-    #for tr in testuser.trade_list:
-        #tr.check_liquidation()
-    #mexc_api.history_positions(testuser.api_key, testuser.api_secret,1,50)
-
-    #testuser.get_trades_mexc()
-    #print(testuser.trade_list[38].open_trades)
-    #testuser.get_rr_ratios()
-    #testuser.positionsize_vs_pnl()
-    #testuser.risk_vs_accountsize()
-    #test_group_trades_by_key(testuser) #erster trade fehlt in API output.txt, checken obs wegen timestamp ist.
-    #test_get_trades_mexc(testuser)
-    #print(len(testuser.trade_list))
-
-
-
-    #testuser.trade_frequency_by_day() # Sortierung stimmt noch nicht.
-    #testuser.get_pnls()
-    #testuser.net_profit()
-    #testuser.get_winrate() # wird hier nur deklariert, nicht ausgegeben. Ausgabe muss separat sein
-    #print(testuser.winrate)
-    #testuser.get_outcomes()
-    #testuser.long_short_ratio()
-    #testuser.get_traded_assets()
-    #print(testuser.calc_profitfactor_month())
-    #testuser.get_timestamps() # Hier prüfen für Liquidations ob es richtig erkannt wird.
-    #testuser.long_short_winrate()
-    #testuser.get_outcomes() # 1 = win -1 = loss
-    #testuser.avg_win_loss()
-    #testuser.get_tp_hitrate()
-    #testuser.get_sl_hitrate()
-    #testuser.get_longest_streak()
-    #print(testuser.get_liquidations())
 
 
 
