@@ -125,6 +125,33 @@ def get_trade_groups():
     cursor.close()
     conn.close()
 
+def get_tags():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM tags")
+    rows = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]  # Get column names
+
+    print(tabulate(rows, headers=column_names, tablefmt="grid"))
+
+    cursor.close()
+    conn.close()
+
+
+def get_trade_tags():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM trade_group_tags")
+    rows = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]  # Get column names
+
+    print(tabulate(rows, headers=column_names, tablefmt="grid"))
+
+    cursor.close()
+    conn.close()
+
 
 def get_single_trade():
     conn = get_connection()
@@ -178,13 +205,7 @@ def wipe_trade_tables():
     cursor.close()
     conn.close()
 
-
-
-
-def main():
-
-
-    """
+def quick_add_db():
     testuser = user.User("mx0vgllVKkGlQJ7cYg", "424ec2cc1b794079a539755577e8638b")
     testuser.set_be_point(0.1)
     history = mexc.get_history_orders(testuser.api_key, testuser.api_secret, page_size='100', )['data']
@@ -192,20 +213,22 @@ def main():
     testuser.create_trade_groups(trades)
 
     testuser.add_list_to_database()
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
 
 
-    cursor.execute("DESCRIBE user")
 
-    col = cursor.fetchall()
 
-    for row in col:
-        print(row)
+def main():
 
-    cursor.close()
-    conn.close()
+    print(Database_Handler.get_user_tag_ids(1))
+    #697550603
+
+
+
+
+
+
+    #get_trade_groups()
+
     #get_trade_groups()
     #get_single_trade()
     #wipe_trade_tables()

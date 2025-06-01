@@ -86,6 +86,94 @@ def check_existing_trade(position_ID):
     exists = result is not  None
     return exists
 
+def add_tag(user_id, tag_name):
+    """
+    Adds a new tag for a specific user to the tags table. tag_id is auto increment, no assignment needed.
+
+    :param user_id: ID of the user creating the tag
+    :param tag_name: Name of the tag to add
+    :return: void
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Check if tag already exists for the user
+        cursor.execute("""
+                    SELECT 1 FROM tags
+                    WHERE user_ID = %s AND name = %s
+                """, (user_id, tag_name))
+
+        if cursor.fetchone():
+            print(f"Tag '{tag_name}' already exists for user {user_id}.")
+            return
+
+        # Execute if tag-trade pair doesn't exist
+
+        cursor.execute("""
+            INSERT INTO tags (user_ID, name)
+            VALUES (%s, %s)
+        """, (user_id, tag_name))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_user_tag_ids(user_id):
+    """
+    Retrieves all tag IDs for a specific user.
+
+    :param user_id: ID of the user
+    :return: List of tag IDs belonging to the user
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT tag_ID FROM tags WHERE user_ID = %s
+        """, (user_id,))
+        results = cursor.fetchall()
+        return [row[0] for row in results]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_tag_to_trade_group(position_id, tag_id):
+    """
+    Assigns
+
+    :param position_id:
+    :param tag_id:
+    :return:
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+                    SELECT 1 FROM trade_group_tags
+                    WHERE trade_group_id = %s AND tag_id = %s
+                """, (position_id, tag_id))
+
+        if cursor.fetchone():
+            print(f"Tag ID {tag_id} is already assigned to trade group {position_id}.")
+            return
+
+        cursor.execute("""
+            INSERT INTO trade_group_tags (trade_group_id, tag_id)
+            VALUES (%s, %s)
+        """, (position_id, tag_id))
+
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 
 def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
     """

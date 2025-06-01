@@ -108,7 +108,7 @@ def long_short_ratio(mistake =None, setup=None):
         if trade["side"] == 4:
             longs += 1
 
-    print("total trades: " + str(len(self.trade_list)))
+    print("total trades: " + str(len(trades)))
     print("long / short ratio: " + str(longs) + " / " + str(shorts))
 
 
