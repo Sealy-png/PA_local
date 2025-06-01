@@ -239,7 +239,31 @@ CREATE TABLE trade (
 
 """
 
+def drop_all_tables():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="your_password",
+        database="your_database"
+    )
+    cursor = conn.cursor()
 
+    try:
+        # Disable foreign key checks
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+
+        # Drop tables individually
+        tables = ["trade", "trade_group_tags", "tags", "trade_group", "user"]
+        for table in tables:
+            cursor.execute(f"DROP TABLE IF EXISTS {table}")
+
+        # Re-enable foreign key checks
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
 
 def main():
 
