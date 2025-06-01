@@ -101,7 +101,7 @@ def get_potential_liquidations():
         print(trade)
 
 
-#print(json.dumps(mexc.get_account_assets("mx0vglQex9FqRaEn23", "69ad91c2428149f290c779549cf4cf1e"),indent=4))
+
 
 def get_connection():
     return mysql.connector.connect(
@@ -219,7 +219,7 @@ def quick_add_db():
 
 def main():
 
-    print(Database_Handler.get_user_tag_ids(1))
+    get_trade_tags()
     #697550603
 
 

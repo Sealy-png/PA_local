@@ -278,7 +278,103 @@ def get_longest_streak(self, mistake, setup):
               + "    " + str(tr["outcome"]))
     # return longest_streak, longest_streak_list
 
+def new_call_db(columns=None, table=None, tag=None):
+    conn = None
+    cursor = None
 
+    ALLOWED_TABLES = {"trade_group", "trade"}
+    ALLOWED_COLUMNS = {
+        # Trade table columns
+        "trade_ID",  # (if present in your schema)
+        "position_ID",
+        "timestamp",
+        "type",
+        "price",
+        "raw_profit",
+        "profit",
+        "leverage",
+        "volume",
+        "margin",
+        "tp",
+        "sl",
+        "setup_tag",
+        "mistake_tag",
+
+        # trade_group table columns
+        "user_ID",
+        "side",
+        "pair",
+        "pnl",
+        "tp_hit",
+        "sl_hit",
+        "be_point",
+        "outcome",
+        "fees",
+        "risk_reward",
+        "total_margin",
+        "liqprice",
+        "risk",
+        "is_liquidated"
+        }
+
+    if table is not None:
+        if table not in ALLOWED_TABLES:
+            raise ValueError(f"Invalid table name: {table}")
+    if columns is not None:
+        for col in columns:
+            if col not in ALLOWED_COLUMNS:
+                raise ValueError(f"invalid column: {col}")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Step 1: Get the tag_id for the tag name and user
+        cursor.execute("""
+                    SELECT tag_id FROM tags
+                    WHERE name = %s AND user_ID = 1
+                """, (tag))
+        tag_row = cursor.fetchone()
+
+        if not tag_row:
+            return []  # No such tag found
+
+        tag_id = tag_row['tag_id']
+
+        # Step 2: Get all trade_group_ids with this tag
+        cursor.execute("""
+                    SELECT trade_group_id FROM trade_group_tags
+                    WHERE tag_id = %s
+                """, (tag_id,))
+        position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
+
+        if not position_ids:
+            return []
+
+        # Step 3: Fetch all trade_group rows for the found position_ids
+        # Use IN clause to get all matching rows
+        format_strings = ','.join(['%s'] * len(position_ids))
+        query = f"""
+                    SELECT * FROM trade_group
+                    WHERE position_ID IN ({format_strings})
+                """
+        cursor.execute(query, position_ids)
+        return cursor.fetchall()
+
+
+
+    finally:
+
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
+
+
+
+
+    pass
 def call_db(columns=None, table=None, mistake=None, setup=None):
     """
     Quick way to access necessary database output in the form of a list of tuples. Will only return columns specified
