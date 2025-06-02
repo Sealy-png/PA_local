@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import json
 
+from wasabi import table
 
 from trade_group import Trade_Group
 from close_trade import Close_Trade
@@ -278,7 +279,7 @@ def get_longest_streak(self, mistake, setup):
               + "    " + str(tr["outcome"]))
     # return longest_streak, longest_streak_list
 
-def new_call_db(columns=None, table=None, tag=None):
+def new_call_db(user_id, columns=None, table=None, tag=None):
     conn = None
     cursor = None
 
@@ -365,24 +366,61 @@ def new_call_db(columns=None, table=None, tag=None):
         tag_row = None
 
         if tag is not None:
-            cursor.execute("""
+            if isinstance(tag, str):
+                cursor.execute("""
                            SELECT tag_id
                            FROM tags
-                           WHERE name = %s AND user_ID = 1
-                           """, (tag))
+                           WHERE name = %s 
+                           """, tag)
+            else:
+                variable_string = ",".join(["&s"]*len(tag))
+                query = f""" SELECT DISTINCT tag_id
+                           FROM tags
+                           WHERE name IN ({variable_string})"""
+                cursor.execute(query, tag)
 
-            tag_row = cursor.fetchone()
+            tag_id = [row['tag_id'] for row in cursor.fetchall()]
+            if not tag_id:
+                return []
 
             #aufruf mit tag wenn einer gegeben ist
-            tag_id = tag_row['tag_id']
+            id_string = ",".join(["%s"]*len(tag_id))
 
             # Step 2: Get all trade_group_ids with this tag
-            cursor.execute("""
+            cursor.execute(f"""
                            SELECT trade_group_id
                            FROM trade_group_tags
-                           WHERE tag_id = %s AND
+                           WHERE tag_id IN ({id_string})
                            """, (tag_id,))
             position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
+
+            if not position_ids:
+                return []
+
+            select = f"SELECT *"
+            if columns is not None:
+                cols = ",".join(columns)
+                select = f"SELECT {cols}"
+
+            from_table = f"FROM {table}"
+
+            format = ",".join(["%s"]*len(position_ids))
+            where = f"WHERE trade_group_id IN ({format})"
+
+            query = " ".join([select, from_table, where])
+
+            cursor.execute(query,position_ids)
+
+        else:
+            select = f"SELECT *"
+
+            if columns is not None:
+                cols = ",".join(columns)
+                select = f"SELECT {cols}"
+
+            from_table = f"FROM {table}"
+
+            where = f"WHERE "
 
 
 

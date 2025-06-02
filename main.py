@@ -261,25 +261,7 @@ def drop_all_tables():
         conn.close()
 
 def main():
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    describe user
-
-
-    """)
-
-    for row in cursor:
-        print(row)
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    #get_trade_groups()
+    print(",".join(["%s"]*1))
 
 
 
