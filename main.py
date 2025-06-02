@@ -262,24 +262,7 @@ def drop_all_tables():
 
 def main():
 
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    describe user
-
-
-    """)
-
-    for row in cursor:
-        print(row)
-
-    conn.commit()
-
-    cursor.close()
-    conn.close()
-
-    #get_trade_groups()
+    test_get_trades_mexc()
 
 
 
