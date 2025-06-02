@@ -340,11 +340,10 @@ def new_call_db(columns=None, table=None, tag=None):
             return []  # No such tag found
 
         tag_id = tag_row['tag_id']
-
         # Step 2: Get all trade_group_ids with this tag
         cursor.execute("""
                     SELECT trade_group_id FROM trade_group_tags
-                    WHERE tag_id = %s
+                    WHERE tag_id = %s AND 
                 """, (tag_id,))
         position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
 
@@ -360,6 +359,31 @@ def new_call_db(columns=None, table=None, tag=None):
                 """
         cursor.execute(query, position_ids)
         return cursor.fetchall()
+
+        #---------------------------------------------------------------------------------------------------------
+
+        tag_row = None
+
+        if tag is not None:
+            cursor.execute("""
+                           SELECT tag_id
+                           FROM tags
+                           WHERE name = %s AND user_ID = 1
+                           """, (tag))
+
+            tag_row = cursor.fetchone()
+
+            #aufruf mit tag wenn einer gegeben ist
+            tag_id = tag_row['tag_id']
+
+            # Step 2: Get all trade_group_ids with this tag
+            cursor.execute("""
+                           SELECT trade_group_id
+                           FROM trade_group_tags
+                           WHERE tag_id = %s AND
+                           """, (tag_id,))
+            position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
+
 
 
 
