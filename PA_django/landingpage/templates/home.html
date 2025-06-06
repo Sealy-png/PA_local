@@ -1,8 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    {% load static %}
+    <link href="../static/landingpage/style.css" rel="stylesheet">
 
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
@@ -13,201 +18,7 @@
       {% endblock %}
     </title>
 
-    <style>
-      /* Body ohne padding, nur margin 0 */
-      body {
-        height: 100%;
-        margin: 0;
-        font-family: "Roboto", "Anton", sans-serif;
-        background-color: #fff;
-      }
 
-      .page-wrapper {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* Zentrierter Container mit max-width und horizontalem Innenabstand */
-      .container {
-        flex: 1;
-        max-width: 1800px;
-        margin: 0 auto;          /* zentriert */
-        padding: 0 8rem;         /* Innenabstand links/rechts */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-
-      /*-------------------------------Navbar-------------------------------*/
-
-      /* Navbar mit vollem Hintergrund */
-      .navbar {
-        font-family: "Roboto";
-        background-color: #001123;
-        padding: 2rem 0; /* nur vertikales padding */
-        box-sizing: border-box;
-      }
-
-      /* Navigation links im Container */
-      .nav-links {
-        display: flex;
-        gap: 1.5rem;
-      }
-
-      .nav-links a {
-        position: relative;
-        text-decoration: none;
-        color: #FFFFFF;
-        transition: color 0.2s;
-      }
-
-      .nav-links a::after {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: -4px;
-        left: 0;
-        background-color: #BFD8FF;
-        border-radius: 3px;
-        transition: width 0.3s ease;
-      }
-
-      .nav-links a:hover {
-        color: #BFD8FF;
-      }
-
-      .nav-links a:hover:after {
-        width: 100%;
-      }
-
-       /* TODO Responsive - Menü auf kleinen Bildschirmen ausblenden */
-      @media (max-width: 768px) {
-        .nav-links {
-          display: none;
-        }
-      }
-
-      /* Logo Container */
-      .logo {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #FFFFFF;
-      }
-
-      /* Logo Image*/
-      .logo img {
-        max-width: 150px;
-        width: 5vw;
-        height: auto;
-        border-radius: 2px;
-      }
-
-      /*-------------------------------END-Navbar-END-------------------------------*/
-
-      /*-------------------------------Footer-------------------------------*/
-
-      .footer {
-  background-color: #000000;
-  color: #FFFFFF;
-  padding: 2rem 4rem;
-  font-size: 0.9rem;
-  font-family: "Roboto", sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-top,
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-/* Logo */
-.footer-logo img {
-        max-width: 150px;
-        width: 5vw;
-        height: auto;
-        border-radius: 2px;
-}
-
-/* Social Icons */
-.footer-socials a {
-  display: inline-block;
-  margin: 0 0.5rem;
-  transition: opacity 0.3s;
-}
-
-.footer-socials a img {
-  height: 24px;
-  width: 24px;
-}
-
-.footer-socials a:hover {
-  opacity: 0.7;
-}
-
-/* Kontakt E-Mail */
-.footer-contact a {
-  color: #BFD8FF;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-contact a:hover {
-  color: #FFFFFF;
-}
-
-/* Untere Zeile: links Text */
-.footer-copy {
-  flex: 1 1 auto;
-}
-
-/* Untere Zeile: rechts Legal Links, untereinander */
-.footer-legal {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  text-align: right;
-}
-
-.footer-legal a {
-  color: #BFD8FF;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-legal a:hover {
-  color: #FFFFFF;
-}
-
-/* Responsive (kleinere Bildschirme) */
-@media (max-width: 600px) {
-  .footer-top,
-  .footer-bottom {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .footer-legal {
-    text-align: center;
-    flex-direction: row;
-    gap: 1rem;
-  }
-}
-
-
-      /*-------------------------------END-Footer-END-------------------------------*/
-
-
-    </style>
   </head>
   <body>
   <div class="page-wrapper">
@@ -234,30 +45,32 @@
 
     <!-- -------------------------------Footer------------------------------- -->
     <footer class="footer">
+  <div class="footer-container">
   <div class="footer-top">
     <div class="footer-logo">
-      <img src="../static/landingpage/PA_Logo_Bull.png" alt="Projectanalysis Logo" />
+      <img src="../static/landingpage/PA_Logo_Bull.PNG" alt="Projectanalysis Logo" />
     </div>
     <div class="footer-socials">
-      <a href="#" aria-label="Facebook"><img src="" alt="Projectanalysis Twitter X" /></a>
-      <a href="#" aria-label="Twitter"><img src="" alt="Projectanalysis Instagram" /></a>
-      <a href="#" aria-label="Instagram"><img src="" alt="Projectanalysis LinkedIn" /></a>
-      <a href="#" aria-label="LinkedIn"><img src="" alt="Projectanalysis Youtube" /></a>
+      <a href="#" aria-label="Facebook"><img src="../static/landingpage/Icon_X_White.png" alt="Projectanalysis Twitter X" /></a>
+      <a href="#" aria-label="Twitter"><img src="../static/landingpage/Icon_Instagram_White.png" alt="Projectanalysis Instagram" /></a>
+      <a href="#" aria-label="Instagram"><img src="../static/landingpage/Icon_LinkedIn_White.png" alt="Projectanalysis LinkedIn" /></a>
+      <a href="#" aria-label="LinkedIn"><img src="../static/landingpage/Icon_Youtube_White.png" alt="Projectanalysis Youtube" /></a>
     </div>
     <div class="footer-contact">
-      <a href="mailto:kontakt@deinedomain.de">PROJECTANALYSISBUSINESS@GMAIL.COM</a>
+      <a href="mailto:projectanalysisbusiness@gmail.com">PROJECTANALYSISBUSINESS@GMAIL.COM</a>
     </div>
   </div>
 
   <div class="footer-bottom">
     <div class="footer-copy">
-      <p>© 2025 Dein Projektname. Alle Rechte vorbehalten.</p>
+      <p>© 2025 ProjectAnalysis. All rights reserved.</p>
     </div>
     <div class="footer-legal">
       <a href="#">Impressum</a>
       <a href="#">Datenschutz</a>
       <a href="#">AGB</a>
     </div>
+  </div>
   </div>
 </footer>
 
