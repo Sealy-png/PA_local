@@ -141,11 +141,11 @@ def get_user_tag_ids(user_id):
         conn.close()
 
 
-def add_tag_to_trade_group(position_id, tag_id):
+def add_tag_to_trade_group(group_id, tag_id):
     """
     Assigns
 
-    :param position_id:
+    :param group_id:
     :param tag_id:
     :return:
     """
@@ -157,16 +157,16 @@ def add_tag_to_trade_group(position_id, tag_id):
         cursor.execute("""
                     SELECT 1 FROM trade_group_tags
                     WHERE trade_group_id = %s AND tag_id = %s
-                """, (position_id, tag_id))
+                """, (group_id, tag_id))
 
         if cursor.fetchone():
-            print(f"Tag ID {tag_id} is already assigned to trade group {position_id}.")
+            print(f"Tag ID {tag_id} is already assigned to trade group {group_id}.")
             return
 
         cursor.execute("""
             INSERT INTO trade_group_tags (trade_group_id, tag_id)
             VALUES (%s, %s)
-        """, (position_id, tag_id))
+        """, (group_id, tag_id))
 
         conn.commit()
     finally:

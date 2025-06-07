@@ -10,7 +10,7 @@ from trade_group import Trade_Group
 from close_trade import Close_Trade
 from open_trade import Open_Trade
 from user import User
-
+import Database_Handler
 
 
 def get_timestamps(self):
@@ -34,11 +34,13 @@ def risk_vs_accountsize(self):
 
 def get_connection():
     return mysql.connector.connect(
-    host="localhost",         # oder die IP-Adresse deines MySQL-Servers
-    user="root",
-    password="root",
-    database="pa_db"
-)
+        host="localhost",  # oder die IP-Adresse deines MySQL-Servers
+        user="root",
+        password="root",
+        database="pa_db"
+        )
+
+
 def new_risk_vs_accountsize(userID):
     conn = get_connection()
     trade_cursor = conn.cursor()
@@ -59,21 +61,11 @@ def new_risk_vs_accountsize(userID):
         pass
 
 
-
-
-
-def get_pnls(mistake =None, setup=None):
-    columns = ["pnl"]
-    trades = call_db(columns, "trade_group", mistake, setup)
-    for trade in trades:
-        print(trade["pnl"])
-
-
-def get_winrate(mistake =None, setup=None):  # Hier trades pro positionId
+def get_winrate(tag=None):  # Hier trades pro positionId
     won = 0
 
     columns = ["outcome"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
     for tr in trades:
         if tr["outcome"] == 1:
             won += 1
@@ -83,6 +75,8 @@ def get_winrate(mistake =None, setup=None):  # Hier trades pro positionId
         winrate = (won / len(trades)) * 100
     else:
         winrate = 0
+
+    return winrate
 
 
 def get_traded_assets(self):
@@ -96,65 +90,62 @@ def get_traded_assets(self):
     print(assets)
 
 
-def long_short_ratio(mistake =None, setup=None):
+def long_short_ratio(tag=None):
     longs = 0
     shorts = 0
 
     columns = ["side"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
 
     for trade in trades:
-        if trade["side"] == 2:
+        if trade["side"] == "2":
             shorts += 1
-        if trade["side"] == 4:
+        if trade["side"] == "4":
             longs += 1
 
     print("total trades: " + str(len(trades)))
     print("long / short ratio: " + str(longs) + " / " + str(shorts))
 
 
-def net_profit(mistake =None, setup=None):
+def net_profit(tag=None):
     net = 0
 
     columns = ["pnl"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
     for trade in trades:
         net += trade["pnl"]
 
     print(net)
 
 
-def get_outcomes(mistake =None, setup=None):
+def get_outcomes(tag=None):
     columns = ["outcome"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
     for trade in trades:
         # print(str(trade.outcome) + "    ||     " + str(trade.pnl) + "     ||        " + str(trade.total_margin))
         print(trade["outcome"])
 
 
-def get_rr_ratios(self, mistake=None, setup=None):
-
-    columns = ["timestamp", "pnl","risk_reward"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+def get_rr_ratios(tag=None):
+    columns = ["timestamp", "pnl", "risk_reward", "price"]
+    trades = call_db(1, columns, "trade_group", tag)
     # benötigt 2 calls auf die Datenbank da hier auch single trades gefragt sind und nicht nur trade groups
     for trade in trades:
-        if trade.risk_reward != None:
-            print("TP: " + str(trade.open_trades[0].tp) + "  |  Price: "
-                  + str(trade.open_trades[0].price) + "  |  SL: " + str(
-                trade.open_trades[0].sl) + "  |  RR-Ratio: " + str(round(trade.risk_reward, 4)))
+        if trade["risk_reward"] != None:
+            print("TP: " + str(trade["risk_reward"]))
             # for open in trade.open_trades:
             # print(open.riskreward)
             # print(str(trade.risk_reward))
             # print(f"Index: {index}, Trade: {trade}")
 
 
-def calc_profitfactor_month(mistake=None, setup=None):
+def calc_profitfactor_month(tag=None):
     # get all trades within last 30 days
     thirty_days_ago_ms = round(time.time() * 1000) - (30 * 24 * 60 * 60 * 1000)
     lastmonth_list = []
 
-    columns = ["timestamp","pnl"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    columns = ["timestamp", "pnl"]
+    trades = call_db(1, columns, "trade_group", tag)
 
     for trade in trades:
         if (trade["timestamp"] > thirty_days_ago_ms):
@@ -249,14 +240,14 @@ def trade_frequency_by_week(self):
         print("; ".join(trade_details))
 
 
-def get_longest_streak(self, mistake, setup):
+def get_longest_streak(tag=None):
     current_streak = 0
     longest_streak = 0
     current_streak_list = []
     longest_streak_list = []
 
     columns = ["position_ID", "outcome", "timestamp"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
 
     for trade in trades:
         if trade["outcome"] == 1:
@@ -279,6 +270,199 @@ def get_longest_streak(self, mistake, setup):
               + "    " + str(tr["outcome"]))
     # return longest_streak, longest_streak_list
 
+    """
+    """
+
+
+def get_pnls(tag=None):
+    columns = ["pnl"]
+    trades = call_db(1, columns, "trade_group", tag)
+    for trade in trades:
+        print(trade)
+
+
+def call_db(user_id, columns=None, table=None, tag=None):
+    """
+    Retrieves rows from trade_group or trade table for a specific user.
+    If tags are provided, only trade_groups that have ALL specified tags are returned.
+
+    :param user_id: ID of the user whose data should be retrieved
+    :param columns: Optional list of columns to return. If None, returns all columns.
+    :param table: Either "trade_group" or "trade"
+    :param tag: Optional tag name (string) or list of tag names. All must match.
+    :return: List of rows (as dictionaries)
+    """
+    conn = None
+    cursor = None
+
+    ALLOWED_TABLES = {"trade_group", "trade"}
+    ALLOWED_COLUMNS = {
+        "trade_ID", "position_ID", "timestamp", "type", "price", "raw_profit", "profit",
+        "leverage", "volume", "margin", "tp", "sl", "setup_tag", "mistake_tag",
+        "user_ID", "side", "pair", "pnl", "tp_hit", "sl_hit", "be_point", "outcome",
+        "fees", "risk_reward", "total_margin", "liqprice", "risk", "is_liquidated", "group_ID"
+        }
+
+    if table not in ALLOWED_TABLES:
+        raise ValueError(f"Invalid table name: {table}")
+    if columns is not None:
+        for col in columns:
+            if col not in ALLOWED_COLUMNS:
+                raise ValueError(f"Invalid column: {col}")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Base query parts
+        select_clause = "SELECT *" if columns is None else f"SELECT {', '.join(columns)}"
+        from_clause = f"FROM {table}"
+        where_clauses = []
+        values = []
+
+        # Always filter by user_ID in trade_group
+        if table == "trade_group":
+            where_clauses.append("user_ID = %s")
+            values.append(user_id)
+
+        if tag:
+            if isinstance(tag, str):
+                tag = [tag]  # wrap single tag in list
+
+            # Get all tag_ids for this user
+            placeholders = ", ".join(["%s"] * len(tag))
+            cursor.execute(f"""
+                SELECT tag_id FROM tags WHERE name IN ({placeholders}) AND user_ID = %s
+            """, (*tag, user_id))
+
+            tag_ids = [row["tag_id"] for row in cursor.fetchall()]
+            if len(tag_ids) != len(tag):
+                return []  # Not all tags exist
+
+            # Find trade_group_ids that have ALL tag_ids
+            placeholders = ", ".join(["%s"] * len(tag_ids))
+            cursor.execute(f"""
+                SELECT trade_group_id
+                FROM trade_group_tags
+                WHERE tag_id IN ({placeholders})
+                GROUP BY trade_group_id
+                HAVING COUNT(DISTINCT tag_id) = %s
+            """, (*tag_ids, len(tag_ids)))
+
+            group_ids = [row["trade_group_id"] for row in cursor.fetchall()]
+            if not group_ids:
+                return []
+
+            placeholders = ", ".join(["%s"] * len(group_ids))
+            where_clauses.append(f"group_ID IN ({placeholders})")
+            values.extend(group_ids)
+
+        # Assemble and execute final query
+        where_clause = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        query = f"{select_clause} {from_clause} {where_clause}"
+
+        cursor.execute(query, values)
+        return cursor.fetchall()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def test_call_db(user_id, columns=None, table=None, tag=None):
+    """
+    Retrieves rows from trade_group or trade table for a specific user.
+    If a tag is provided, filters results by tag.
+
+    requirements: table has to be string, columns has to be a list, even if only 1 column is needed
+
+    :param user_id: ID of the user whose data should be retrieved
+    :param columns: Optional list of columns to return. If None, returns all columns.
+    :param table: Either "trade_group" or "trade"
+    :param tag: Optional tag name (string) or list of tag names
+    :return: List of rows (as dictionaries)
+    """
+    conn = None
+    cursor = None
+
+    ALLOWED_TABLES = {"trade_group", "trade"}
+    ALLOWED_COLUMNS = {
+        "trade_ID", "position_ID", "timestamp", "type", "price", "raw_profit", "profit",
+        "leverage", "volume", "margin", "tp", "sl", "setup_tag", "mistake_tag",
+        "user_ID", "side", "pair", "pnl", "tp_hit", "sl_hit", "be_point", "outcome",
+        "fees", "risk_reward", "total_margin", "liqprice", "risk", "is_liquidated", "group_ID"
+        }
+
+    if table not in ALLOWED_TABLES:
+        raise ValueError(f"Invalid table name: {table}")
+    if columns is not None:
+        for col in columns:
+            if col not in ALLOWED_COLUMNS:
+                raise ValueError(f"Invalid column: {col}")
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Define SELECT clause
+        select_clause = "SELECT *" if columns is None else f"SELECT {', '.join(columns)}"
+        from_clause = f"FROM {table}"
+        where_clauses = []
+        values = []
+
+        # Always filter by user_ID for trade_group
+        if table == "trade_group":
+            where_clauses.append("user_ID = %s")
+            values.append(user_id)
+
+        if tag:
+            # Step 1: Resolve tag name(s) to tag_id(s)
+            if isinstance(tag, str):
+                cursor.execute("""
+                    SELECT tag_id FROM tags WHERE name = %s AND user_ID = %s
+                """, (tag, user_id))
+            else:
+                placeholders = ", ".join(["%s"] * len(tag))
+                cursor.execute(f"""
+                    SELECT tag_id FROM tags WHERE name IN ({placeholders}) AND user_ID = %s
+                """, (*tag, user_id))
+
+            tag_ids = [row["tag_id"] for row in cursor.fetchall()]
+            if not tag_ids:
+                return []  # No tags matched
+
+            # Step 2: Find group_IDs with those tags
+            placeholders = ", ".join(["%s"] * len(tag_ids))
+            cursor.execute(f"""
+                SELECT trade_group_id FROM trade_group_tags
+                WHERE tag_id IN ({placeholders})
+            """, tag_ids)
+
+            group_ids = [row["trade_group_id"] for row in cursor.fetchall()]
+            if not group_ids:
+                return []  # No trades with those tags
+
+            # Step 3: Add group_ID filter
+            placeholders = ", ".join(["%s"] * len(group_ids))
+            where_clauses.append(f"group_ID IN ({placeholders})")
+            values.extend(group_ids)
+
+        # Assemble and execute query
+        where_clause = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        query = f"{select_clause} {from_clause} {where_clause}"
+
+        cursor.execute(query, values)
+        return cursor.fetchall()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
 def new_call_db(user_id, columns=None, table=None, tag=None):
     conn = None
     cursor = None
@@ -286,36 +470,11 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
     ALLOWED_TABLES = {"trade_group", "trade"}
     ALLOWED_COLUMNS = {
         # Trade table columns
-        "trade_ID",  # (if present in your schema)
-        "position_ID",
-        "timestamp",
-        "type",
-        "price",
-        "raw_profit",
-        "profit",
-        "leverage",
-        "volume",
-        "margin",
-        "tp",
-        "sl",
-        "setup_tag",
-        "mistake_tag",
-
+        "trade_ID", "position_ID", "timestamp", "type", "price", "raw_profit", "profit",
+        "leverage", "volume", "margin", "tp", "sl", "setup_tag", "mistake_tag",
         # trade_group table columns
-        "user_ID",
-        "side",
-        "pair",
-        "pnl",
-        "tp_hit",
-        "sl_hit",
-        "be_point",
-        "outcome",
-        "fees",
-        "risk_reward",
-        "total_margin",
-        "liqprice",
-        "risk",
-        "is_liquidated"
+        "user_ID", "side", "pair", "pnl", "tp_hit", "sl_hit", "be_point", "outcome",
+        "fees", "risk_reward", "total_margin", "liqprice", "risk", "is_liquidated"
         }
 
     if table is not None:
@@ -330,39 +489,6 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Step 1: Get the tag_id for the tag name and user
-        cursor.execute("""
-                    SELECT tag_id FROM tags
-                    WHERE name = %s AND user_ID = 1
-                """, (tag))
-        tag_row = cursor.fetchone()
-
-        if not tag_row:
-            return []  # No such tag found
-
-        tag_id = tag_row['tag_id']
-        # Step 2: Get all trade_group_ids with this tag
-        cursor.execute("""
-                    SELECT trade_group_id FROM trade_group_tags
-                    WHERE tag_id = %s AND 
-                """, (tag_id,))
-        position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
-
-        if not position_ids:
-            return []
-
-        # Step 3: Fetch all trade_group rows for the found position_ids
-        # Use IN clause to get all matching rows
-        format_strings = ','.join(['%s'] * len(position_ids))
-        query = f"""
-                    SELECT * FROM trade_group
-                    WHERE position_ID IN ({format_strings})
-                """
-        cursor.execute(query, position_ids)
-        return cursor.fetchall()
-
-        #---------------------------------------------------------------------------------------------------------
-
         tag_row = None
 
         if tag is not None:
@@ -373,7 +499,7 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
                            WHERE name = %s 
                            """, tag)
             else:
-                variable_string = ",".join(["&s"]*len(tag))
+                variable_string = ",".join(["%s"] * len(tag))
                 query = f""" SELECT DISTINCT tag_id
                            FROM tags
                            WHERE name IN ({variable_string})"""
@@ -383,15 +509,16 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
             if not tag_id:
                 return []
 
-            #aufruf mit tag wenn einer gegeben ist
-            id_string = ",".join(["%s"]*len(tag_id))
+            # aufruf mit tag wenn einer gegeben ist
+            id_string = ",".join(["%s"] * len(tag_id))
 
             # Step 2: Get all trade_group_ids with this tag
             cursor.execute(f"""
                            SELECT trade_group_id
                            FROM trade_group_tags
                            WHERE tag_id IN ({id_string})
-                           """, (tag_id,))
+                           """, tag_id)
+
             position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
 
             if not position_ids:
@@ -404,12 +531,12 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
 
             from_table = f"FROM {table}"
 
-            format = ",".join(["%s"]*len(position_ids))
+            format = ",".join(["%s"] * len(position_ids))
             where = f"WHERE trade_group_id IN ({format})"
 
             query = " ".join([select, from_table, where])
 
-            cursor.execute(query,position_ids)
+            cursor.execute(query, position_ids)
 
         else:
             select = f"SELECT *"
@@ -433,11 +560,10 @@ def new_call_db(user_id, columns=None, table=None, tag=None):
         if conn is not None:
             conn.close()
 
-
-
-
     pass
-def call_db(columns=None, table=None, mistake=None, setup=None):
+
+
+def old(columns=None, table=None, mistake=None, setup=None):
     """
     Quick way to access necessary database output in the form of a list of tuples. Will only return columns specified
     in columns param. table needs to be specified, otherwise trade_group is the default table.
@@ -534,10 +660,7 @@ def call_db(columns=None, table=None, mistake=None, setup=None):
             conn.close()
 
 
-
-
-
-def long_short_winrate(mistake = None, setup = None):
+def long_short_winrate(tag=None):
     """
     iterates over all trades according to tags given in the function and calculates winrates for shorts and longs
     respectively. If no tags are given, calculates winrates for all trades in database
@@ -547,7 +670,7 @@ def long_short_winrate(mistake = None, setup = None):
     :return: simply prints value, is not saved anywhere
     """
     columns = ["side", "outcome"]
-    trades = call_db(columns, "trade_group", mistake, setup)
+    trades = call_db(1, columns, "trade_group", tag)
 
     longamount = 0
     longrate = 0
@@ -568,36 +691,34 @@ def long_short_winrate(mistake = None, setup = None):
 
     return f"Winrate shorts: {shortwinrate} || Winrate longs: {longwinrate}"
 
-    #return (" Winrate shorts: " + str(shortwinrate) + " || Winrate longs: " + str(longwinrate))
+    # return (" Winrate shorts: " + str(shortwinrate) + " || Winrate longs: " + str(longwinrate))
 
 
-
-
-def get_tp_hitrate(mistake = None, setup = None):
+def get_tp_hitrate(tag=None):
     hits = 0
-    trades = call_db(["tp_hit"], "trade_group", mistake, setup)
+    trades = call_db(["tp_hit"], "trade_group", tag)
     for trade in trades:
         if trade["tp_hit"] == 1:
             hits += 1
     print("TP hitrate: " + str(round((hits / len(trades)) * 100, 2)) + "%")
 
 
-def get_sl_hitrate(mistake = None, setup = None):
+def get_sl_hitrate(tag=None):
     hits = 0
-    trades = call_db(["sl_hit"], "trade_group", mistake, setup)
+    trades = call_db(1, ["sl_hit"], "trade_group", tag)
     for trade in trades:
         if trade["sl_hit"] == 1:
             hits += 1
     print("SL hitrate: " + str(round((hits / len(trades)) * 100, 2)) + "%")
 
 
-def avg_win_loss(self, mistake = None, setup = None):
+def avg_win_loss(tag=None):
     wins = 0
     winval = 0
     losses = 0
     lossval = 0
 
-    trades = call_db(["outcome", "pnl"], "trade_group", mistake, setup)
+    trades = call_db(1, ["outcome", "pnl"], "trade_group", tag)
 
     for tr in trades:
         if tr["pnl"] > 0:
@@ -613,8 +734,8 @@ def avg_win_loss(self, mistake = None, setup = None):
     print("Average amount won: " + str(avgwin) + " || Average amount lost: " + str(avgloss))
 
 
-def get_liquidations(mistake = None, setup = None):
-    trades = call_db(["position_ID","is_liquidated" ], "trade_group", mistake, setup)
+def get_liquidations(tag=None):
+    trades = call_db(["position_ID", "is_liquidated"], "trade_group", tag)
     liquidations = []
 
     for trade in trades:

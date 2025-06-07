@@ -1,3 +1,5 @@
+import random
+
 import Trade_Analyzer
 import mexc_api
 import mexc_api as mexc
@@ -11,6 +13,7 @@ import time
 import mysql.connector
 import json
 from tabulate import tabulate
+from random import randrange
 
 import Database_Handler
 
@@ -260,9 +263,40 @@ def drop_all_tables():
         cursor.close()
         conn.close()
 
-def main():
-    print(",".join(["%s"]*1))
+def get_user_tag_ids(user_id):
+    """Returns a list of tag_ids for a given user."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT tag_id FROM tags WHERE user_ID = %s
+        """, (user_id,))
+        return [row[0] for row in cursor.fetchall()]
+    finally:
+        cursor.close()
+        conn.close()
 
+def main():
+    tags1 = ["test"]
+    tags2 = ["test2"]
+
+    setup =["test","test2"]
+
+    get_trade_groups()
+    #print(Trade_Analyzer.get_winrate(tags1))
+    #Trade_Analyzer.long_short_ratio()
+    #Trade_Analyzer.net_profit()
+    #Trade_Analyzer.get_outcomes()
+    #Trade_Analyzer.get_rr_ratios()
+    #print(Trade_Analyzer.calc_profitfactor_month())
+    #Trade_Analyzer.get_longest_streak()
+    #Trade_Analyzer.get_pnls()
+    #print(Trade_Analyzer.long_short_winrate())
+    #show_tables()
+    #get_trade_groups()
+    #Trade_Analyzer.get_sl_hitrate()
+    #Trade_Analyzer.long_short_ratio()
+    #Trade_Analyzer.avg_win_loss()
 
 
 

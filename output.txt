@@ -8,6 +8,42 @@
 
 
 
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Step 1: Get the tag_id for the tag name and user
+        cursor.execute("""
+                    SELECT tag_id FROM tags
+                    WHERE name = %s AND user_ID = 1
+                """, (tag))
+        tag_row = cursor.fetchone()
+
+        if not tag_row:
+            return []  # No such tag found
+
+        tag_id = tag_row['tag_id']
+        # Step 2: Get all trade_group_ids with this tag
+        cursor.execute("""
+                    SELECT trade_group_id FROM trade_group_tags
+                    WHERE tag_id = %s AND
+                """, (tag_id,))
+        position_ids = [row['trade_group_id'] for row in cursor.fetchall()]
+
+        if not position_ids:
+            return []
+
+        # Step 3: Fetch all trade_group rows for the found position_ids
+        # Use IN clause to get all matching rows
+        format_strings = ','.join(['%s'] * len(position_ids))
+        query = f"""
+                    SELECT * FROM trade_group
+                    WHERE position_ID IN ({format_strings})
+                """
+        cursor.execute(query, position_ids)
+        return cursor.fetchall()
+
+        #---------------------------------------------------------------------------------------------------------
+
 
  {"orderId": "623713417450046976", "symbol": "BTC_USDT", "positionId": 607267686, "price": 107135.5, "priceStr": "107135.500000000000000000", "vol": 472, "leverage": 66, "side": 1,
  "category": 1, "orderType": 5, "dealAvgPrice": 107135.5, "dealAvgPriceStr": "107135.500000000000000000", "dealVol": 472, "orderMargin": 78.64080734, "takerFee": 2.02271824,
