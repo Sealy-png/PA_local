@@ -391,7 +391,7 @@ class User:
                     volume=open_trade['dealVol'],
                     leverage=open_trade['leverage'],
                     timestamp=open_trade['createTime'],
-                    margin=open_trade['usedMargin'],
+                    margin=open_trade['orderMargin'],
                     tp=open_trade.get('takeProfitPrice', None),
                     sl=open_trade.get('stopLossPrice', None),
                     fees=buy_fees

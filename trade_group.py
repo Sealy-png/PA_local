@@ -54,12 +54,14 @@ class Trade_Group:
         hour = utc_time.hour  # Extract the hour from UTC
 
         # Determine session
-        if 0 <= hour < 9:
+        if 22 <= hour < 4:
             self.session = "Asian Session"
-        elif 7 <= hour < 16:
-            self.session = "European Session"
-        elif 13 <= hour < 22:
-            self.session = "U.S. Session"
+        elif 4 <= hour < 12:
+            self.session = "London Session"
+        elif 12 <= hour < 16:
+            self.session = "NY AM"
+        elif 16 <= hour < 22:
+            self.session = "NY PM"
         else:
             self.session = "Overlap Period"
 
@@ -195,8 +197,10 @@ class Trade_Group:
         size = 0
 
         for trade in self.open_trades:
-            use_margin = trade.margin - trade.fees
-            size += use_margin * trade.leverage
+            x=0
+            used_margin = trade.margin - trade.fees
+            size += used_margin * trade.leverage
+            x +=1
         return size
 
 

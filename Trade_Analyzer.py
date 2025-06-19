@@ -79,8 +79,8 @@ def risk_vs_accountsize(exchange):
 
 
 def positionsize_vs_pnl(userID):
-
-    columns = ["position_size","pnl"]
+#TODO: historische accountsize hinzufügen --> immer der entry der am nächsten am zeitpunkt des trades
+    columns = ["position_size","pnl", "timestamp"]
     trades = call_db(1, columns, "trade_group")
 
     for trade in trades:
@@ -271,7 +271,11 @@ def trade_frequency_by_week(tag=None):
         trade_by_week[(iso_year, iso_week)].append((week_label, trade))
     # Sort by year and week number chronologically
     sorted_weeks = sorted(trade_by_week.items())
+
+
+
     for (_, trades) in sorted_weeks:
+        # TODO: Anzahl der trades in der aktuellen woche
         week_label = trades[0][0]  # Extract week label from the first entry
         print(f"{week_label} ({len(trades)} trades):", end=" ")
         trade_details = [f"positionId = {trade['position_ID']}, pnl = {trade['pnl']}" for _, trade in trades]

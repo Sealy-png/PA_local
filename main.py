@@ -225,9 +225,17 @@ def main():
     setup =["test","test2"]
 
 
-    #get_trade_groups()
+    #get_user_account()
+    get_trade_groups()
+    #wipe_trade_tables()
+    #quick_add_db()
+    #get_single_trade()
+
+
     #-------------------------------------------------------------------------
     #Noch zu testen:
+    #Trade_Analyzer.trade_frequency_by_day()
+    #Trade_Analyzer.trade_frequency_by_week()
     #print(Trade_Analyzer.trade_group_count(1))
     #Trade_Analyzer.risk_vs_accountsize("MEXC")
     Trade_Analyzer.positionsize_vs_pnl(1)
