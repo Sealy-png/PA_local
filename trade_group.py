@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 class Trade_Group:
 
     def __init__(self, positionId, side, pair, be_point):  # outcomepoint für BE rechnung
@@ -19,6 +20,8 @@ class Trade_Group:
         self.liqprice = None #double
         self.risk = 0 #double
         self.is_liquidated = False
+        self.session = None
+        self.exchange = None
 
 
     def post_init(self):
@@ -33,12 +36,29 @@ class Trade_Group:
         self.set_fees()  # used in set_pnl
         self.set_pnl()   # used in set_outcome
         self.set_outcome() #sets margin
-        self.find_highest_timestamp() # no dependencies
+        self.set_timestamp() # no dependencies
+        self.set_session() #uses timestamp
         self.set_rr_ratios()
 
 
 
 
+    def set_exchange(self, exchange):
+        self.exchange= exchange
+
+    def set_session(self):
+        utc_time = datetime.utcfromtimestamp(self.timestamp / 1000)
+        hour = utc_time.hour  # Extract the hour from UTC
+
+        # Determine session
+        if 0 <= hour < 9:
+            return "Asian Session"
+        elif 7 <= hour < 16:
+            return "European Session"
+        elif 13 <= hour < 22:
+            return "U.S. Session"
+        else:
+            return "Overlap Period"
 
     def set_rr_ratios(self):
         total_riskreward = 0
@@ -131,11 +151,11 @@ class Trade_Group:
         self.pnl -= self.fees
 
 
-    def find_highest_timestamp(self):
+    def set_timestamp(self):
         stamps = []
         for trade in self.close_trades:
             stamps.append(trade.timestamp)
-        self.timestamp = max(stamps)
+        self.timestamp = min(stamps)
 
     def print_Trade(self):
         print(self.positionId)
@@ -159,6 +179,7 @@ class Trade_Group:
 
     # prozentsatz vom pnl relativ zur positionsgröße
     def ps_v_pnl(self):
+        #TODO
         size = self.calcpositionsize()
         if (len(self.open_trades) != 0):
             return self.pnl/size

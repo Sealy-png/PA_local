@@ -65,7 +65,7 @@ def add_trade(trade):
     conn.close()
 
 
-def check_existing_trade(position_ID):
+def check_existing_trade(position_ID, exchange):
     """
     Checks if a trade is already in the Database
 
@@ -76,8 +76,8 @@ def check_existing_trade(position_ID):
     cursor = conn.cursor()
 
     cursor.execute("""
-            SELECT position_ID FROM trade_group WHERE position_ID = %s
-        """, (position_ID,))
+            SELECT position_ID FROM trade_group WHERE position_ID = %s AND exchange = %s
+        """, (position_ID, exchange))
     result = cursor.fetchall()
 
     cursor.close()
@@ -175,13 +175,13 @@ def add_tag_to_trade_group(group_id, tag_id):
 
 
 
-def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
+def add_trade_group(trade_group):
     """
     Adds a trade_group to the trade_group table
     :param trade_group: trade group object to be added to the table
     :return: void
     """
-    cancel = check_existing_trade(getattr(trade_group, 'positionId'))
+    cancel = check_existing_trade(getattr(trade_group, 'positionId'), getattr(trade_group, 'exchange'))
 
     # if Check for existing trade returns true, insertion is cancelled.
     if cancel:
@@ -209,6 +209,7 @@ def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
         getattr(trade_group, 'positionId'),
         getattr(trade_group, 'side'),
         getattr(trade_group, 'pair'),
+        getattr(trade_group, 'exchange'),
         getattr(trade_group, 'price'),
         getattr(trade_group, 'pnl'),
         getattr(trade_group, 'tp_hit'),
@@ -218,12 +219,12 @@ def add_trade_group(trade_group, setup_tag= None, mistake_tag=None):
         getattr(trade_group, 'fees'),
         getattr(trade_group, 'risk_reward'),
         getattr(trade_group, 'timestamp'),
+        getattr(trade_group, 'session'),
         getattr(trade_group, 'total_margin'),
         getattr(trade_group, 'liqprice'),
         getattr(trade_group, 'risk'),
         getattr(trade_group, 'is_liquidated'),
-        setup_tag,
-        mistake_tag # Both tags are optional
+
     )
     cursor.execute(query, values)
 

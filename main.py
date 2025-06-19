@@ -130,6 +130,19 @@ def get_users():
     cursor.close()
     conn.close()
 
+def get_user_account():
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Fetch all rows from the user table
+    cursor.execute("SELECT * FROM user_account")
+    rows = cursor.fetchall()
+    column_names = [desc[0] for desc in cursor.description]  # Get column names
+
+    print(tabulate(rows, headers=column_names, tablefmt="grid"))
+
+    cursor.close()
+    conn.close()
+
 def show_tables():
     conn = get_connection()
     cursor = conn.cursor()
@@ -164,6 +177,86 @@ def quick_add_db():
     testuser.create_trade_groups(trades)
 
     testuser.add_list_to_database()
+
+
+
+
+def drop_all_tables():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Disable foreign key checks
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+
+        # Drop tables individually
+        tables = ["trade", "trade_group_tags", "tags", "trade_group", "user"]
+        for table in tables:
+            cursor.execute(f"DROP TABLE IF EXISTS {table}")
+
+        # Re-enable foreign key checks
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_user_tag_ids(user_id):
+    """Returns a list of tag_ids for a given user."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT tag_id FROM tags WHERE user_ID = %s
+        """, (user_id,))
+        return [row[0] for row in cursor.fetchall()]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+def main():
+    tags1 = ["test"]
+    tags2 = ["test2"]
+
+    setup =["test","test2"]
+
+
+    get_user_account()
+    #-------------------------------------------------------------------------
+    #Noch zu testen:
+    print(Trade_Analyzer.trade_group_count(1))
+
+
+    # ------------------------------------------------------------------------
+    #Bereits getestet:
+
+    #get_trade_groups()
+    #print(Trade_Analyzer.get_winrate(tags1))
+    #Trade_Analyzer.long_short_ratio()
+    #Trade_Analyzer.net_profit()
+    #Trade_Analyzer.get_outcomes()
+    #Trade_Analyzer.get_rr_ratios()
+    #print(Trade_Analyzer.calc_profitfactor_month())
+    #Trade_Analyzer.get_longest_streak()
+    #Trade_Analyzer.get_pnls()
+    #print(Trade_Analyzer.long_short_winrate())
+    #show_tables()
+    #get_trade_groups()
+    #Trade_Analyzer.get_sl_hitrate()
+    #Trade_Analyzer.long_short_ratio()
+    #Trade_Analyzer.avg_win_loss()
+
+
+
+
+
+
+if __name__ == '__main__':
+    main()
 
 
 """
@@ -241,67 +334,3 @@ CREATE TABLE trade (
 );
 
 """
-
-def drop_all_tables():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Disable foreign key checks
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-
-        # Drop tables individually
-        tables = ["trade", "trade_group_tags", "tags", "trade_group", "user"]
-        for table in tables:
-            cursor.execute(f"DROP TABLE IF EXISTS {table}")
-
-        # Re-enable foreign key checks
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-
-def get_user_tag_ids(user_id):
-    """Returns a list of tag_ids for a given user."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            SELECT tag_id FROM tags WHERE user_ID = %s
-        """, (user_id,))
-        return [row[0] for row in cursor.fetchall()]
-    finally:
-        cursor.close()
-        conn.close()
-
-def main():
-    tags1 = ["test"]
-    tags2 = ["test2"]
-
-    setup =["test","test2"]
-
-    get_trade_groups()
-    #print(Trade_Analyzer.get_winrate(tags1))
-    #Trade_Analyzer.long_short_ratio()
-    #Trade_Analyzer.net_profit()
-    #Trade_Analyzer.get_outcomes()
-    #Trade_Analyzer.get_rr_ratios()
-    #print(Trade_Analyzer.calc_profitfactor_month())
-    #Trade_Analyzer.get_longest_streak()
-    #Trade_Analyzer.get_pnls()
-    #print(Trade_Analyzer.long_short_winrate())
-    #show_tables()
-    #get_trade_groups()
-    #Trade_Analyzer.get_sl_hitrate()
-    #Trade_Analyzer.long_short_ratio()
-    #Trade_Analyzer.avg_win_loss()
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()

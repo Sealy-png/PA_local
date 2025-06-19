@@ -2,6 +2,7 @@ import json
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
+import mysql
 
 import Database_Handler
 import mexc_api as mexc
@@ -23,13 +24,20 @@ class User:
         self.winrate = 0
         self.be_point = 0  # percentage of margin where trade becomes break_even
         self.mexc_accountsize = {}
-        self.set_mexc_accountsize(mexc.get_account_assets(self.api_key, self.api_secret))
+        respone = mexc.get_account_assets(self.api_key, self.api_secret)
+        print(respone)
+        self.set_mexc_accountsize(1, respone)
 
     def add_list_to_database(self):
+        maximum = 0
+        for trade in self.trade_list:
+            if trade.timestamp > maximum:
+                maximum = trade.timestamp
+        print(maximum)
         for trade in self.trade_list:
             Database_Handler.add_trade_group(trade)
 
-    def set_mexc_accountsize(self, api_response):
+    def old_set_mexc_accountsize(self, api_response):
         """
         Populate self.mexc_accountsize with currency as key and account values from MEXC API response.
         Expected format: {'data': [ { 'currency': 'USDT', 'availableBalance': ... }, ... ]}
@@ -40,13 +48,37 @@ class User:
             for entry in api_response['data']:
                 currency = entry.get('currency')
                 if currency:
-                    # Store whatever values you care about
                     self.mexc_accountsize[currency] = {
-                        # "availableBalance": entry.get("availableBalance", 0),
-                        "equity": entry.get("equity", 0),
-                        # "cashBalance": entry.get("cashBalance", 0)
-                        # add more fields if needed
+                        "equity": entry.get("equity", 0)
                         }
+
+
+    def set_mexc_accountsize(self,user_id,api_response):
+        conn = mysql.connector.connect(
+        host="localhost",  # oder die IP-Adresse deines MySQL-Servers
+        user="root",
+        password="root",
+        database="pa_db"
+        )
+        cursor = conn.cursor()
+        for entry in api_response.get('data', []):
+            currency = entry.get('currency')
+            if currency:
+                equity = entry.get('equity', 0)
+
+                # Upsert logic: update if exists, else insert
+                query = """
+                        INSERT INTO user_account (user_ID, currency,exchange, equity)
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE
+                          equity = VALUES(equity),
+                          last_updated = CURRENT_TIMESTAMP;
+                    """
+                cursor.execute(query, (user_id, currency,"MEXC", equity))
+        conn.commit()
+        cursor.close()
+
+
 
     def set_be_point(self,
                      point):  # Should be created during intitializationn for usage, only to save dev time. Given in whole numbers:  1 = 1%
@@ -398,6 +430,7 @@ class User:
 
             self.trade_list.append(trade)
             Trade_Group.post_init(trade)
+            trade.set_exchange("MEXC")
             if trade.positionId in group:
                 trade.liqprice = group[trade.positionId]["liquidatePrice"]
 
