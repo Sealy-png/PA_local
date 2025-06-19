@@ -34,23 +34,11 @@ class User:
             if trade.timestamp > maximum:
                 maximum = trade.timestamp
         print(maximum)
+
+
         for trade in self.trade_list:
             Database_Handler.add_trade_group(trade)
 
-    def old_set_mexc_accountsize(self, api_response):
-        """
-        Populate self.mexc_accountsize with currency as key and account values from MEXC API response.
-        Expected format: {'data': [ { 'currency': 'USDT', 'availableBalance': ... }, ... ]}
-        """
-        self.mexc_accountsize = {}
-
-        if isinstance(api_response, dict) and 'data' in api_response:
-            for entry in api_response['data']:
-                currency = entry.get('currency')
-                if currency:
-                    self.mexc_accountsize[currency] = {
-                        "equity": entry.get("equity", 0)
-                        }
 
 
     def set_mexc_accountsize(self,user_id,api_response):

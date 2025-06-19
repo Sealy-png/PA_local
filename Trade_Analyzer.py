@@ -13,45 +13,7 @@ from user import User
 import Database_Handler
 
 
-def get_timestamps(self):
-    for tr in self.trade_list:
-        # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
-        print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0, )) + "    " + str(
-            tr.category) + "   Liquidation Price: " + str(tr.liqprice))
 
-
-def risk_vs_accountsize(exchange):
-    columns = ["risk", "group_ID", "pair", exchange]
-    trades = call_db(1, columns, "trade_group")
-
-    for trade in trades:
-
-        tmp = trade["pair"]
-        pair = tmp.split('_')[-1]
-        trade["pair"] = pair
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    query ="""
-        SELECT * FROM user_account 
-        WHERE user_ID = %s AND exchange = %s AND currency = %s
-    """
-    cursor.execute(""" SELECT""")
-
-
-    for trade in trades:
-
-
-        #2. Auf
-
-        risk = trade.trade_risk()
-        if (risk == None):
-            continue
-        pair = trade.pair.split("_")[1]
-        entry = self.mexc_accountsize[pair]
-        size = entry["equity"]
-        print("RISK:  " + str(round(risk, 4)) + "    result: " + str(round(risk / size, 4)) + "    Time: " + str(
-            str(datetime.fromtimestamp(trade.timestamp / 1000.0, ))))
 def get_connection():
     return mysql.connector.connect(
         host="localhost",  # oder die IP-Adresse deines MySQL-Servers
@@ -60,6 +22,72 @@ def get_connection():
         database="pa_db"
         )
 
+def get_timestamps(self):
+    for tr in self.trade_list:
+        # print(datetime.datetime.fromtimestamp(tr.timestamp / 1000.0, tz=datetime.timezone.utc))
+        print(str(tr.positionId) + "   " + str(datetime.fromtimestamp(tr.timestamp / 1000.0, )) + "    " + str(
+            tr.category) + "   Liquidation Price: " + str(tr.liqprice))
+
+
+def risk_vs_accountsize(exchange):
+    """
+    function is limited to comparing the trades of an exchange to the corresponding exchange accountsize.
+    Owning similar currency on separate exchanges does not increase accountsize
+    :param exchange: currently, only MEXC
+    :return:
+    """
+
+    columns = ["risk", "pair", "exchange", "timestamp"]
+    trades = call_db(1, columns, "trade_group")
+
+    #Change pair as saved in table from BTC_USDT to only USDT, meaning USDT holdings is used.
+    for trade in trades:
+
+        tmp = trade["pair"]
+        pair = tmp.split('_')[-1]
+        trade["pair"] = pair
+
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    query ="""
+        SELECT * FROM user_account 
+        WHERE user_ID = %s AND exchange = %s 
+    """
+    values = [1, exchange]
+    cursor.execute(query, values)
+
+    account_dict = {row['currency']: row['equity'] for row in cursor.fetchall()}
+
+    cursor.close()
+    conn.close()
+
+    for trade in trades:
+        risk = trade["risk"]
+        if (risk == None) :#or risk == 0:
+            continue
+
+        size = account_dict.get(trade["pair"],0)
+        if size == None : #or size == 0:
+            continue
+
+        if(risk != 0):
+            print("RISK:  " + str(round(risk, 4)) + "    result: " + str(float(risk)/float(size))+ "       Size:  " + str(size) +  "    Time: " + str(
+                str(datetime.fromtimestamp(trade["timestamp"]/ 1000.0, ))))
+
+
+
+
+def positionsize_vs_pnl(userID):
+
+    columns = ["position_size","pnl"]
+    trades = call_db(1, columns, "trade_group")
+
+    for trade in trades:
+        x =trade["position_size"]
+        y = trade["pnl"]
+        z = float(x)/float(y)
+        print(f" Positionsize: {x}, PNL: {y},  pos_size vs PNL: {z}")
 
 def new_risk_vs_accountsize(userID):
     conn = get_connection()
@@ -203,34 +231,7 @@ def trade_group_count(user_ID):
     return count[0]
 
 
-def positionsize_vs_pnl(self):
-    avg = 0
-    counter = 0
-    wins = []
-    losses = []
-    for trade in self.trade_list:
-        counter += 1
-        if (len(trade.open_trades) != 0):
-            current = trade.ps_v_pnl()
-            if (current >= 0):
-                wins.append(current)
-            else:
-                losses.append(current)
-            print(str(round(current, 4)) + "   |   " + str(counter))
-            avg += current
-    avg_win = 0
-    avg_loss = 0
 
-    for x in wins:
-        avg_win += x
-    for x in losses:
-        avg_loss += x
-
-    avg_win = avg_win / len(self.trade_list)
-    avg_loss = avg_loss / len(self.trade_list)
-    print("average win: " + str(round(avg_win, 4)))
-    print("average loss: " + str(round(avg_loss, 4)))
-    print("average: " + str(round(avg / len(self.trade_list), 4)))
 
 
 def trade_frequency_by_day(tag=None):
@@ -337,7 +338,7 @@ def call_db(user_id, columns=None, table=None, tag=None):
         "trade_ID", "position_ID", "timestamp", "type", "price", "raw_profit", "profit",
         "leverage", "volume", "margin", "tp", "sl", "setup_tag", "mistake_tag",
         "user_ID", "side", "pair", "pnl", "tp_hit", "sl_hit", "be_point", "outcome",
-        "fees", "risk_reward", "total_margin", "liqprice", "risk", "is_liquidated", "group_ID"
+        "fees", "risk_reward", "total_margin", "liqprice", "risk", "is_liquidated", "group_ID","exchange","position_size"
         }
 
     if table not in ALLOWED_TABLES:

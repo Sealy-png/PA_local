@@ -171,7 +171,7 @@ def wipe_trade_tables():
 
 def quick_add_db():
     testuser = user.User("mx0vgllVKkGlQJ7cYg", "424ec2cc1b794079a539755577e8638b")
-    testuser.set_be_point(0.1)
+    testuser.set_be_point(10)
     history = mexc.get_history_orders(testuser.api_key, testuser.api_secret, page_size='100', )['data']
     trades = testuser.group_trades_by_key(history)
     testuser.create_trade_groups(trades)
@@ -225,11 +225,12 @@ def main():
     setup =["test","test2"]
 
 
-    get_user_account()
+    #get_trade_groups()
     #-------------------------------------------------------------------------
     #Noch zu testen:
-    print(Trade_Analyzer.trade_group_count(1))
-
+    #print(Trade_Analyzer.trade_group_count(1))
+    #Trade_Analyzer.risk_vs_accountsize("MEXC")
+    Trade_Analyzer.positionsize_vs_pnl(1)
 
     # ------------------------------------------------------------------------
     #Bereits getestet:

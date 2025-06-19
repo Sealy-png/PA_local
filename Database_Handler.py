@@ -83,8 +83,8 @@ def check_existing_trade(position_ID, exchange):
     cursor.close()
     conn.close()
 
-    exists = result is not  None
-    return exists
+    not_exists = result is None
+    return not_exists
 
 def add_tag(user_id, tag_name):
     """
@@ -191,16 +191,18 @@ def add_trade_group(trade_group):
     conn = get_connection()
     cursor = conn.cursor()
 
+    test = getattr(trade_group,'session')
+
 
 
     query = """
                 INSERT INTO trade_group (
-                    user_ID, position_ID, side, pair, price, pnl, tp_hit, sl_hit, be_point, 
-                    outcome, fees, risk_reward, timestamp,
-                    total_margin, liqprice, risk, is_liquidated, setup_tag, mistake_tag
+                    user_ID, position_ID, side, pair, exchange, price, pnl, position_size, tp_hit, sl_hit, be_point, 
+                    outcome, fees, risk_reward, timestamp, session,
+                    total_margin, liqprice, risk, is_liquidated
                     
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
             """
 
@@ -212,6 +214,7 @@ def add_trade_group(trade_group):
         getattr(trade_group, 'exchange'),
         getattr(trade_group, 'price'),
         getattr(trade_group, 'pnl'),
+        getattr(trade_group, 'position_size'),
         getattr(trade_group, 'tp_hit'),
         getattr(trade_group, 'sl_hit'),
         getattr(trade_group, 'be_point'),

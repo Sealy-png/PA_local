@@ -12,7 +12,7 @@ class Trade_Group:
         self.tp_hit = False
         self.sl_hit = False
         self.be_point = be_point #double
-        self.outcome = 0  # -1 = loss, 0 = break evenn, 1 = profit
+        self.outcome = 0  # -1 = loss, 0 = break even, 1 = profit
         self.fees = 0 #double
         self.risk_reward = 0 #double
         self.timestamp = None #long
@@ -22,6 +22,7 @@ class Trade_Group:
         self.is_liquidated = False
         self.session = None
         self.exchange = None
+        self.position_size = None
 
 
     def post_init(self):
@@ -39,6 +40,8 @@ class Trade_Group:
         self.set_timestamp() # no dependencies
         self.set_session() #uses timestamp
         self.set_rr_ratios()
+        self.trade_risk()
+        self.position_size = self.calcpositionsize()
 
 
 
@@ -52,13 +55,13 @@ class Trade_Group:
 
         # Determine session
         if 0 <= hour < 9:
-            return "Asian Session"
+            self.session = "Asian Session"
         elif 7 <= hour < 16:
-            return "European Session"
+            self.session = "European Session"
         elif 13 <= hour < 22:
-            return "U.S. Session"
+            self.session = "U.S. Session"
         else:
-            return "Overlap Period"
+            self.session = "Overlap Period"
 
     def set_rr_ratios(self):
         total_riskreward = 0
@@ -97,6 +100,8 @@ class Trade_Group:
             debug = self.price
 
             risk = abs(self.price - avg_sl) * mod_size
+
+            self.risk = risk
 
             return risk
         else:
