@@ -7,6 +7,14 @@
         background-color: #fff;
       }
 
+      .font-anton {
+        font-family: "Anton", "Roboto", sans-serif;
+        font-size: 4rem;
+        letter-spacing: 0.03em;
+      }
+
+
+
       .page-wrapper {
         min-height: 100vh;
         display: flex;
@@ -15,14 +23,20 @@
 
       /* Zentrierter Container mit max-width und horizontalem Innenabstand */
       .container {
-        flex: 1;
-        max-width: 1800px;
-        margin: 0 auto;          /* zentriert */
-        padding: 0 8rem;         /* Innenabstand links/rechts */
+          max-width: 1800px;
+          margin: 0 auto;
+          padding: 2rem 8rem;
+      }
+
+      .container-flex {
         display: flex;
         justify-content: space-between;
         align-items: center;
-      }
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 0 8rem;
+}
+
 
 
       /*-------------------------------Navbar-------------------------------*/
@@ -102,6 +116,7 @@
   padding: 3rem 0 2rem 0;
   font-size: 0.9rem;
   font-family: "Roboto", sans-serif;
+  z-index: 1;
 }
 
 .footer-container {
@@ -115,7 +130,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .footer-logo {
@@ -174,11 +189,13 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
 }
 
 .footer-copy {
     flex: 1 1 auto;
+    justify-content: flex-start;
+    align-items: flex-end;
 }
 
 .footer-legal {
@@ -228,6 +245,143 @@
 }
 
 
-      /*-------------------------------END-Footer-END-------------------------------*/
+/*-------------------------------END-Footer-END-------------------------------*/
+
+
+/*-------------------------------HOME-------------------------------*/
+
+.hero-section {
+  background-color: #001123;
+  color: white;
+  padding: 1px 0 100px 0;
+  position: relative;
+  z-index: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 85%);
+}
+
+.hero-section h1 {
+    margin: 0;
+    margin-bottom: 5rem;
+}
+
+.why-choose-section {
+  background-color: #C6C6C6;
+  margin-top: -15%;
+  margin-bottom: -5rem;
+  padding-top: 300px;
+  padding-bottom: 100px;
+  position: relative;
+  z-index: 0;
+}
+
+.why-choose-section h1 {
+    color: #0060A2;
+    font-family: "Anton", "Roboto", sans-serif;
+    letter-spacing: 0.03em;
+    font-size: 50px;
+}
+
+.why-choose-section h2 {
+    color: #06446E;
+    font-family: "Anton", "Roboto", sans-serif;
+    letter-spacing: 0.03em;
+    font-size: 40px;
+}
+
+.why-choose-section p {
+    font-family: "Roboto", sans-serif;
+    font-size: 18px;
+}
+
+/*-------------------------------DISCORD-------------------------------*/
+
+.discord-hero-section {
+    background-color: #001123;
+    text-align: center;
+    font-family: "Anton", "Roboto", sans-serif;
+    padding-bottom: 100px;
+}
+
+.discord-hero-section h1 {
+    color: #BFD8FF;
+    font-size: 150px;
+    margin-top: 0;
+    margin-bottom: 0;
+    letter-spacing: 2px;
+}
+
+.discord-hero-section h2 {
+    color: white;
+    font-size: 38px;
+    margin-top: 0;
+    letter-spacing: 1px;
+}
+
+/*-------------------------------SOCIALS-------------------------------*/
+
+.socials-hero-section {
+    background-color: #001123;
+    text-align: center;
+    font-family: "Anton", "Roboto", sans-serif;
+    padding-bottom: 100px;
+}
+
+.socials-hero-section h1 {
+    color: white;
+    font-size: 150px;
+    margin-top: 0;
+    margin-bottom: 0;
+    letter-spacing: 2px;
+}
+
+.socials-hero-section h2 {
+    color: #BFD8FF;
+    font-size: 38px;
+    margin-top: 0;
+    letter-spacing: 1px;
+}
+
+/*-------------------------------BUTTONS-------------------------------*/
+
+.button-white {
+    font-family: "Roboto", "Anton", sans-serif;
+    font-weight: bold;
+    background-color: white;
+    color: black;
+    padding: 15px 35px;
+    font-size: 16px;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-white:hover {
+    background-color: #BFD8FF;
+}
+
+
+/*-------------------------------LINES-------------------------------*/
+
+.hr-black {
+    border: none;
+    height: 1px;
+    background-color: black;
+    margin: 50px auto;
+    border-radius: 10px;
+}
+
+/*-------------------------------BOX-------------------------------*/
+
+.box {
+    background-color: transparent;
+    padding: 20px;
+    flex: 1;
+}
+
+.two-elements {
+    display: flex;
+    gap: 20px;
+}
 
 

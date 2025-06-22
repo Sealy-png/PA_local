@@ -1,80 +1,50 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% block title %} Project Analysis {% endblock %}
 
+{% block content%}
 
-    {% load static %}
-    <link href="../static/landingpage/style.css" rel="stylesheet">
+<section class="hero-section">
+       <div class="container">
+         <h1 class="font-anton" style="line-height: 1; text-align: right; font-size: 7rem;">PROJECT<br>ANALYSIS</h1>
+         <h2 class="font-anton" style="color: #BFD8FF">EFFECTIVE. SIMPLE. DATA ANALYSIS.</h2>
+         <h3 style="margin-top: -50px;">The only professional trading journal you need to improve your trading experience.</h3>
+         <button class="button-white" style="margin-bottom: 0;">GET STARTET NOW</button>
+       </div>
+      </section>
 
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+      <section class="why-choose-section">
+        <div class="container">
+          <h1>WHY CHOOSE PROJECT ANALYSIS?</h1>
+          <h3>EXPLORE THE FULL BENEFITS</h3>
+          <hr class="hr-black">
+          <div class="two-elements">
+            <div class="box">
+              <h2>EASY AND AUTOMATED TRADE IMPORT.</h2>
+              <p>Read only API keys are required to import all of your trades automatically.
+                 Thereby, no effort goes into journaling entries, exits, RR-ratios and much more.
+                 <br><br>
+                 Enable yourself to focus 100% on journaling your setups, mistakes and
+                 psychological factors.</p>
+            </div>
+            <div class="box">
+              <h1>PLACEHOLDER FOR ANIMATION OF LINKING API TO PA</h1>
+            </div>
+            </div>
+            <hr class="hr-black">
+            <div class="two-elements">
+              <div class="box">
+                <h2>TRANSFORM TRADING DATA INTO POWERFUL INSIGHTS.</h2>
+                <p>Through the API-Trading data import, you will receive high quality
+                analytics which will help you understand fundamental issues in your
+                trading approach.</p>
+              </div>
+              <div class="box">
+                <h1>PLACEHOLDER FOR ANIMATION OF DASHBOARD</h1>
+              </div>
+            </div>
 
-    <title>
-      {% block title %}
-        Projectanalysis
-      {% endblock %}
-    </title>
-
-
-  </head>
-  <body>
-  <div class="page-wrapper">
-    <!-- -------------------------------Navigationsleiste------------------------------- -->
-    <nav class="navbar">
-      <div class="container">
-        <div class="logo"><img src="../static/landingpage/PA_Logo_schwarz.jpg" alt="Projectanalysis Logo"></div>
-        <div class="nav-links">
-          <a href="#">Home</a>
-          <a href="#">Discord</a>
-          <a href="#">Socials</a>
-          <a href="#">Supported Brokers</a>
-          <a href="#">Pricing</a>
-          <a href="#">About</a>
-          <a href="#">Login</a>
         </div>
-      </div>
-    </nav>
+      </section>
 
-
-    <main class="container">
-      <h1>Welcome to ProjectAnalysis</h1>
-    </main>
-
-    <!-- -------------------------------Footer------------------------------- -->
-    <footer class="footer">
-  <div class="footer-container">
-  <div class="footer-top">
-    <div class="footer-logo">
-      <img src="../static/landingpage/PA_Logo_Bull.PNG" alt="Projectanalysis Logo" />
-    </div>
-    <div class="footer-socials">
-      <a href="#" aria-label="Facebook"><img src="../static/landingpage/Icon_X_White.png" alt="Projectanalysis Twitter X" /></a>
-      <a href="#" aria-label="Twitter"><img src="../static/landingpage/Icon_Instagram_White.png" alt="Projectanalysis Instagram" /></a>
-      <a href="#" aria-label="Instagram"><img src="../static/landingpage/Icon_LinkedIn_White.png" alt="Projectanalysis LinkedIn" /></a>
-      <a href="#" aria-label="LinkedIn"><img src="../static/landingpage/Icon_Youtube_White.png" alt="Projectanalysis Youtube" /></a>
-    </div>
-    <div class="footer-contact">
-      <a href="mailto:projectanalysisbusiness@gmail.com">PROJECTANALYSISBUSINESS@GMAIL.COM</a>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="footer-copy">
-      <p>© 2025 ProjectAnalysis. All rights reserved.</p>
-    </div>
-    <div class="footer-legal">
-      <a href="#">Impressum</a>
-      <a href="#">Datenschutz</a>
-      <a href="#">AGB</a>
-    </div>
-  </div>
-  </div>
-</footer>
-
-
-  </div>
-  </body>
-</html>
+{% endblock %}

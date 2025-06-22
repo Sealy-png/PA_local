@@ -1,70 +1,85 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+    {% load static %}
+    <link href="../static/landingpage/style.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+
     <title>
       {% block title %}
-        Django App
+        Projectanalysis
       {% endblock %}
     </title>
 
-      <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: #f8f8f8;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: #2e8b57;
-    }
-
-    @media (max-width: 768px) {
-      .nav-links {
-        display: none; /* Für Mobilgeräte könnte man hier ein Burger-Menü einbauen */
-      }
-    }
-  </style>
 
   </head>
   <body>
-
+  <div class="page-wrapper">
+    <!-- -------------------------------Navigationsleiste------------------------------- -->
     <nav class="navbar">
-    <div class="logo">MeinLogo</div>
-    <div class="nav-links">
-      <a href="#">Start</a>
-      <a href="#">Über uns</a>
-      <a href="#">Leistungen</a>
-      <a href="#">Kontakt</a>
-    </div>
-  </nav>
+      <div class="container-flex">
+        <div class="logo"><img src="../static/landingpage/PA_Logo_schwarz.jpg" alt="Projectanalysis Logo"></div>
+        <div class="nav-links">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'discord' %}">Discord</a>
+          <a href="{% url 'socials' %}">Socials</a>
+          <a href="#">Supported Brokers</a>
+          <a href="#">Pricing</a>
+          <a href="#">About</a>
+          <a href="#">Login</a>
+        </div>
+      </div>
+    </nav>
 
+    <!-- -------------------------------HERO------------------------------- -->
+
+    <main>
+      {% block content %}
+        <h1 class="font-anton">Nothing to see here yet.</h1>
+      {% endblock %}
+    </main>
+
+
+    <!-- -------------------------------Footer------------------------------- -->
+    <footer class="footer">
+  <div class="footer-container">
+  <div class="footer-top">
+    <div class="footer-logo">
+      <img src="../static/landingpage/PA_Logo_Bull.PNG" alt="Projectanalysis Logo" />
+    </div>
+    <div class="footer-socials">
+      <a href="#" aria-label="Facebook"><img src="../static/landingpage/Icon_X_White.png" alt="Projectanalysis Twitter X" /></a>
+      <a href="#" aria-label="Twitter"><img src="../static/landingpage/Icon_Instagram_White.png" alt="Projectanalysis Instagram" /></a>
+      <a href="#" aria-label="Instagram"><img src="../static/landingpage/Icon_LinkedIn_White.png" alt="Projectanalysis LinkedIn" /></a>
+      <a href="#" aria-label="LinkedIn"><img src="../static/landingpage/Icon_Youtube_White.png" alt="Projectanalysis Youtube" /></a>
+    </div>
+    <div class="footer-contact">
+      <a href="mailto:projectanalysisbusiness@gmail.com">PROJECTANALYSISBUSINESS@GMAIL.COM</a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-copy">
+      <p>© 2025 ProjectAnalysis. All rights reserved.</p>
+    </div>
+    <div class="footer-legal">
+      <a href="#">Careers</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms & Conditions</a>
+      <a href="#">About us</a>
+    </div>
+  </div>
+  </div>
+</footer>
+
+
+  </div>
   </body>
 </html>
