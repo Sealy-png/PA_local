@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %} PA Login {% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-box">
+    <h1>WELCOME BACK</h1>
+    <p class="subtitle">Login to your account</p>
+    <form method="post" class="login-form">
+      {% csrf_token %}
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit" class="login-button">LOGIN</button>
+    </form>
+    <p class="signup-link">Don't have an account? <a href="#">Sign up</a></p>
+  </div>
+</div>
+
+<div class="footer-decoration" style="background-color: #001123 ">
+        <img src="../static/landingpage/Footer-Curve.svg" alt="" aria-hidden="true">
+</div>
+{% endblock %}
